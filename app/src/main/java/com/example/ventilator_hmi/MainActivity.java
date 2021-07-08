@@ -400,7 +400,7 @@ public class MainActivity extends AppCompatActivity implements SerialInputOutput
         LayoutInflater inflater = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         View alarmPopupView = inflater.inflate(R.layout.popup_alarm_list, null);
         LinearLayout alarmPopupLayout = alarmPopupView.findViewById(R.id.alarm_popup_linearLayout);
-        PopupWindow alarmPopupWindow = new PopupWindow(alarmPopupView, 800, ViewGroup.LayoutParams.WRAP_CONTENT, false);
+        PopupWindow alarmPopupWindow = new PopupWindow(alarmPopupView, 800, 400, false);
 
         alarmRowList = new ArrayList<>();
         model.getAlarm().observe(this, alarm -> {
@@ -652,7 +652,7 @@ class AlarmPopupRow {
     Alarm alarm;
     LinearLayout linearLayout;
     TextView textView;
-    Button button;
+    Button button, empty;
 
     String clear = "Clear";
     int backgroundColor;
@@ -665,7 +665,7 @@ class AlarmPopupRow {
 
         LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, 65);
         layoutParams.gravity = Gravity.CENTER;
-        layoutParams.setMargins(0, 10, 0, 0);
+        layoutParams.setMargins(0, 5, 0, 0);
 
         linearLayout = new LinearLayout(context);
         linearLayout.setPadding(5, 0, 5, 0);
@@ -685,11 +685,20 @@ class AlarmPopupRow {
         textView.setTextColor(textColor);
 
         LinearLayout.LayoutParams buttonParams = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, 60);
+        buttonParams.setMarginEnd(10);
         button = new Button(context);
         button.setLayoutParams(buttonParams);
         button.setText(clear);
 
+        empty = new Button(context);
+        empty.setText(R.string.more);
+        empty.setVisibility(View.INVISIBLE);
+
+        empty.setLayoutParams(buttonParams);
+
+
         linearLayout.addView(textView);
+        linearLayout.addView(empty);
         linearLayout.addView(button);
     }
 }

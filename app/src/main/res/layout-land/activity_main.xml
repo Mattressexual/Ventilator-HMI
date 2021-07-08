@@ -96,9 +96,8 @@
 
                     <LinearLayout
                         android:id="@+id/alarm_bar_view"
-                        android:layout_width="0dp"
+                        android:layout_width="800dp"
                         android:layout_height="65dp"
-                        android:layout_weight="1"
                         android:layout_marginStart="10dp"
                         android:gravity="center"
                         android:orientation="horizontal"
