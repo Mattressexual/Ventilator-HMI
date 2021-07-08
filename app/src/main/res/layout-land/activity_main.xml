@@ -1,0 +1,554 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/gray"
+    tools:context=".MainActivity">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="horizontal">
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_marginStart="15dp"
+                android:orientation="vertical">
+
+                <ImageView
+                    android:src="@drawable/tvp_logo_grayback"
+                    android:layout_width="80dp"
+                    android:layout_height="65dp"
+                    android:layout_gravity="center_horizontal"
+                    android:layout_marginTop="10dp"/>
+
+                <Button
+                    android:id="@+id/standby_button"
+                    android:layout_width="150dp"
+                    android:layout_height="125dp"
+                    android:layout_marginTop="5dp"
+                    android:drawableTop="@drawable/ic_hand_transparent_white"
+                    android:paddingTop="20dp"
+                    android:text="@string/standby"/>
+
+                <Button
+                    android:id="@+id/settings_button"
+                    android:layout_width="150dp"
+                    android:layout_height="125dp"
+                    android:drawableTop="@drawable/ic_gear_transparent_white"
+                    android:paddingTop="20dp"
+                    android:text="@string/settings"/>
+
+                <Button
+                    android:id="@+id/alarm_limits_button"
+                    android:layout_width="150dp"
+                    android:layout_height="125dp"
+                    android:drawableTop="@drawable/ic_bell_transparent_white"
+                    android:paddingTop="20dp"
+                    android:text="@string/alarm_limits"/>
+
+                <Button
+                    android:id="@+id/log_button"
+                    android:layout_width="150dp"
+                    android:layout_height="125dp"
+                    android:drawableTop="@drawable/ic_log_transparent_white"
+                    android:paddingTop="20dp"
+                    android:text="@string/log"/>
+
+                <Button
+                    android:id="@+id/more_button"
+                    android:layout_width="150dp"
+                    android:layout_height="80dp"
+                    android:text="@string/more"/>
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="15dp"
+                android:baselineAligned="false"
+                android:orientation="vertical">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="5dp"
+                    android:gravity="center_vertical"
+                    android:baselineAligned="false"
+                    android:orientation="horizontal">
+
+                    <Button
+                        android:id="@+id/alarm_silence_button"
+                        android:layout_width="100dp"
+                        android:layout_height="75dp"
+                        android:drawableTop="@drawable/ic_alarm_silence"
+                        android:paddingTop="10dp"
+                        android:text=""/>
+
+                    <LinearLayout
+                        android:id="@+id/alarm_bar_view"
+                        android:layout_width="0dp"
+                        android:layout_height="65dp"
+                        android:layout_weight="1"
+                        android:layout_marginStart="10dp"
+                        android:gravity="center"
+                        android:orientation="horizontal"
+                        android:background="@color/design_default_color_primary">
+
+                        <TextView
+                            android:id="@+id/alarm_bar_textView"
+                            android:layout_width="590dp"
+                            android:layout_height="wrap_content"
+                            android:gravity="center"
+                            android:text="@string/no_alarms"
+                            android:textAllCaps="true"
+                            android:textColor="@color/white"
+                            android:textSize="20sp"/>
+
+                        <Button
+                            android:id="@+id/more_alarms_button"
+                            android:layout_width="wrap_content"
+                            android:layout_height="60dp"
+                            android:layout_marginEnd="10dp"
+                            android:visibility="invisible"
+                            android:backgroundTint="@color/white"
+                            android:text="@string/more"
+                            android:textColor="@color/gray"/>
+
+                        <Button
+                            android:id="@+id/clear_alarm_button"
+                            android:layout_width="wrap_content"
+                            android:layout_height="60dp"
+                            android:layout_marginEnd="10dp"
+                            android:visibility="invisible"
+                            android:backgroundTint="@color/white"
+                            android:text="@string/clear"
+                            android:textColor="@color/gray"/>
+
+                    </LinearLayout>
+
+                    <Button
+                        android:id="@+id/full_oxygen_button"
+                        android:layout_width="150dp"
+                        android:layout_height="75dp"
+                        android:layout_marginStart="10dp"
+                        android:layout_marginEnd="10dp"
+                        android:drawableStart="@drawable/ic_o2_up_arrow"
+                        android:text="@string/_100_o2"
+                        android:textSize="18sp"/>
+
+                </LinearLayout>
+
+                <androidx.fragment.app.FragmentContainerView
+                    android:id="@+id/fragment_container_view"
+                    android:layout_width="match_parent"
+                    android:layout_height="600dp"
+                    android:layout_marginTop="5dp"
+                    android:layout_marginBottom="5dp"
+                    android:background="@color/white"/>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:baselineAligned="false"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal">
+
+                    <RelativeLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginEnd="10dp"
+                        android:gravity="center">
+
+                        <Button
+                            android:id="@+id/bt1"
+                            android:layout_width="120dp"
+                            android:layout_height="120dp"
+                            android:enabled="false"
+                            android:stateListAnimator="@null" />
+
+                        <LinearLayout
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_centerInParent="true"
+                            android:orientation="vertical">
+
+                            <TextView
+                                android:id="@+id/bt1_type_textView"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_gravity="center"
+                                android:text="@string/pip"
+                                android:textColor="@color/white"
+                                android:textSize="18sp"/>
+
+                            <TextView
+                                android:id="@+id/bt1_val_textView"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_gravity="center"
+                                android:layout_margin="10dp"
+                                android:text="@string/dash"
+                                android:textColor="@color/white"
+                                android:textSize="18sp"/>
+
+                            <TextView
+                                android:id="@+id/bt1_unit_textView"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_gravity="center"
+                                android:text="@string/cmh20"
+                                android:textColor="@color/white"
+                                android:textSize="18sp"/>
+
+                        </LinearLayout>
+
+                    </RelativeLayout>
+
+                    <RelativeLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginEnd="10dp"
+                        android:gravity="center">
+
+                        <Button
+                            android:id="@+id/peep_button"
+                            android:layout_width="120dp"
+                            android:layout_height="120dp"
+                            android:enabled="false"
+                            android:stateListAnimator="@null" />
+
+                        <LinearLayout
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_centerInParent="true"
+                            android:orientation="vertical">
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_gravity="center"
+                                android:text="@string/peep"
+                                android:textColor="@color/white"
+                                android:textSize="18sp"/>
+
+                            <TextView
+                                android:id="@+id/peep_val_textView"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_gravity="center"
+                                android:layout_margin="10dp"
+                                android:text="@string/dash"
+                                android:textColor="@color/white"
+                                android:textSize="18sp"/>
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_gravity="center"
+                                android:text="@string/cmh20"
+                                android:textColor="@color/white"
+                                android:textSize="18sp"/>
+
+                        </LinearLayout>
+
+                    </RelativeLayout>
+
+                    <RelativeLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginEnd="10dp"
+                        android:gravity="center">
+
+                        <Button
+                            android:id="@+id/bt3"
+                            android:layout_width="120dp"
+                            android:layout_height="120dp"
+                            android:enabled="false"
+                            android:stateListAnimator="@null" />
+
+                        <LinearLayout
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_centerInParent="true"
+                            android:orientation="vertical">
+
+                            <TextView
+                                android:id="@+id/bt3_type_textView"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_gravity="center"
+                                android:text="@string/r_rate"
+                                android:textColor="@color/white"
+                                android:textSize="18sp"/>
+
+                            <TextView
+                                android:id="@+id/bt3_val_textView"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_gravity="center"
+                                android:layout_margin="10dp"
+                                android:text="@string/dash"
+                                android:textColor="@color/white"
+                                android:textSize="18sp"/>
+
+                            <TextView
+                                android:id="@+id/bt3_unit_textView"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_gravity="center"
+                                android:text="@string/bpm"
+                                android:textColor="@color/white"
+                                android:textSize="18sp"/>
+
+                        </LinearLayout>
+
+                    </RelativeLayout>
+
+                    <RelativeLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginEnd="10dp"
+                        android:gravity="center">
+
+                        <Button
+                            android:id="@+id/i_time_button"
+                            android:layout_width="120dp"
+                            android:layout_height="120dp"
+                            android:enabled="false"
+                            android:stateListAnimator="@null" />
+
+                        <LinearLayout
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_centerInParent="true"
+                            android:orientation="vertical">
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_gravity="center"
+                                android:text="@string/i_time"
+                                android:textColor="@color/white"
+                                android:textSize="18sp"/>
+
+                            <TextView
+                                android:id="@+id/iTime_val_textView"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_gravity="center"
+                                android:layout_margin="10dp"
+                                android:text="@string/dash"
+                                android:textColor="@color/white"
+                                android:textSize="18sp"/>
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_gravity="center"
+                                android:text="@string/sec"
+                                android:textColor="@color/white"
+                                android:textSize="18sp"/>
+
+                        </LinearLayout>
+
+                    </RelativeLayout>
+
+                    <RelativeLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginEnd="10dp"
+                        android:gravity="center">
+
+                        <Button
+                            android:id="@+id/i_pause_button"
+                            android:layout_width="120dp"
+                            android:layout_height="120dp"
+                            android:enabled="false"
+                            android:stateListAnimator="@null" />
+
+                        <LinearLayout
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_centerInParent="true"
+                            android:orientation="vertical">
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_gravity="center"
+                                android:text="@string/i_pause"
+                                android:textColor="@color/white"
+                                android:textSize="18sp"/>
+
+                            <TextView
+                                android:id="@+id/iPause_val_textView"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_gravity="center"
+                                android:layout_margin="10dp"
+                                android:text="@string/dash"
+                                android:textColor="@color/white"
+                                android:textSize="18sp"/>
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_gravity="center"
+                                android:text="@string/percent"
+                                android:textColor="@color/white"
+                                android:textSize="18sp"/>
+
+                        </LinearLayout>
+
+                    </RelativeLayout>
+
+                    <RelativeLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginEnd="10dp"
+                        android:gravity="center">
+
+                        <Button
+                            android:id="@+id/fio2_button"
+                            android:layout_width="120dp"
+                            android:layout_height="120dp"
+                            android:enabled="false"
+                            android:stateListAnimator="@null" />
+
+                        <LinearLayout
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_centerInParent="true"
+                            android:orientation="vertical">
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_gravity="center"
+                                android:text="@string/fio2"
+                                android:textColor="@color/white"
+                                android:textSize="18sp"/>
+
+                            <TextView
+                                android:id="@+id/fio2_val_textView"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_gravity="center"
+                                android:layout_margin="10dp"
+                                android:text="@string/dash"
+                                android:textColor="@color/white"
+                                android:textSize="18sp"/>
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_gravity="center"
+                                android:text="@string/percent"
+                                android:textColor="@color/white"
+                                android:textSize="18sp"/>
+
+                        </LinearLayout>
+
+                    </RelativeLayout>
+
+                    <RelativeLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginEnd="10dp"
+                        android:gravity="center">
+
+                        <Button
+                            android:id="@+id/p_trigger_button"
+                            android:layout_width="120dp"
+                            android:layout_height="120dp"
+                            android:enabled="false"
+                            android:stateListAnimator="@null"/>
+
+                        <LinearLayout
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_centerInParent="true"
+                            android:orientation="vertical">
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_gravity="center"
+                                android:text="@string/p_trigger"
+                                android:textColor="@color/white"
+                                android:textSize="18sp"/>
+
+                            <TextView
+                                android:id="@+id/pTrigger_val_textView"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_gravity="center"
+                                android:layout_margin="10dp"
+                                android:text="@string/dash"
+                                android:textColor="@color/white"
+                                android:textSize="18sp"/>
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_gravity="center"
+                                android:text="@string/cmh20"
+                                android:textColor="@color/white"
+                                android:textSize="18sp"/>
+
+                        </LinearLayout>
+
+                    </RelativeLayout>
+
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="10dp"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:id="@+id/ac_power_textView"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/ac_power"
+                            android:textColor="@color/white"
+                            android:textSize="18sp"/>
+
+                        <TextView
+                            android:id="@+id/battery_textView"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="5dp"
+                            android:text="@string/battery"
+                            android:textColor="@color/white"
+                            android:textSize="18sp"/>
+
+                        <TextView
+                            android:id="@+id/date_textView"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="5dp"
+                            android:text="@string/date"
+                            android:textColor="@color/white"
+                            android:textSize="18sp"/>
+
+                    </LinearLayout>
+
+                </LinearLayout>
+
+            </LinearLayout>
+
+        </LinearLayout>
+
+    </LinearLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>

@@ -1,0 +1,99 @@
+<resources>
+
+    <string name="standby_tag">standbyTag</string>
+    <string name="settings_tag">settingsTag</string>
+    <string name="ventilation_tag">ventilationTag</string>
+    <string name="alarm_limits_tag">alarmLimitsTag</string>
+    <string name="waveform_tag">waveformTag</string>
+
+
+    <string name="app_name">Ventilator-HMI</string>
+    <string name="on_standby">On Standby</string>
+    <string name="standby">Standby</string>
+    <string name="settings">Settings</string>
+    <string name="ventilation_tab">VentilationTab</string>
+    <string name="alarm_limits_tab">AlarmLimitsTab</string>
+    <string name="alarm_limits">Alarm Limits</string>
+    <string name="log">Log</string>
+    <string name="more">More</string>
+    <string name="no_alarms">No Alarms</string>
+    <string name="new_patient">New Patient</string>
+    <string name="same_patient">Same Patient</string>
+
+    <string name="ventilation">Ventilation</string>
+    <string name="_100_o2">100% O2</string>
+    <string name="patient_not_ventilated">Patient Not Ventilated</string>
+    <string name="date">Date</string>
+    <string name="last_system_check">Last system check:</string>
+    <string name="_shut_down">Shut down</string>
+
+    <string name="mode">Mode</string>
+    <string name="mode_settings">Mode Settings</string>
+    <string name="pressure_ac">Pressure A/C</string>
+    <string name="volume_ac">Volume A/C</string>
+    <string name="pressure_support">Pressure Support</string>
+    <string name="apply">Apply</string>
+
+    <string name="pip">PIP</string>
+    <string name="vt">Vt</string>
+    <string name="p_support">P Support</string>
+    <string name="peep">PEEP</string>
+    <string name="r_rate">R Rate</string>
+    <string name="backup_rate">Backup Rate</string>
+    <string name="i_time">I Time</string>
+    <string name="i_pause">I Pause</string>
+    <string name="fio2">FiO2</string>
+    <string name="p_trigger">P Trigger</string>
+
+    <string name="cmh20">cmH20</string>
+    <string name="ml">mL</string>
+    <string name="bpm">bpm</string>
+    <string name="sec">sec</string>
+
+    <string name="dash">-</string>
+    <string name="percent">%</string>
+    <string name="ac_power">AC Power</string>
+    <string name="battery">Battery</string>
+    <string name="pip_explanation">PIP is total pressure (includes PEEP)</string>
+    <string name="plus">+</string>
+    <string name="cancel">Cancel</string>
+    <string name="start_ventilation">Start Ventilation</string>
+    <string name="min">min</string>
+    <string name="max">max</string>
+    <string name="p_plat">P Plat</string>
+    <string name="m_vol">M Vol</string>
+    <string name="l_per_min">L/min</string>
+    <string name="ie_ratio">I:E</string>
+    <string name="colon">:</string>
+    <string name="pressure">Pressure</string>
+    <string name="flow">Flow</string>
+    <string name="graph_title">Graph Title</string>
+    <string name="vti">VTi</string>
+    <string name="parenthesis_cmh20">(cmh20)</string>
+    <string name="l_min">(L/min)</string>
+    <string name="date_textView">Date TextView</string>
+    <string name="stop_ventilation_question">Stop ventilation?</string>
+    <string name="continue_ventilation">Continue ventilation</string>
+    <string name="stop_ventilation">Stop Ventilation</string>
+    <string name="high">High</string>
+    <string name="current">Current</string>
+    <string name="low">Low</string>
+    <string name="parenthesis_ml">(mL)</string>
+    <string name="parenthesis_l_min">(L/min)</string>
+    <string name="parenthesis_bpm">(bpm)</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="alarm_log">Alarm Log</string>
+    <string name="alarm">Alarm</string>
+    <string name="priority">Priority</string>
+    <string name="status">Status</string>
+    <string name="started">Started</string>
+    <string name="ended">Ended</string>
+    <string name="close">Close</string>
+    <string name="remove_non_active_alarms">Remove Non-Active Alarms</string>
+    <string name="actions">Actions</string>
+    <string name="shutdown_system">Shutdown System?</string>
+    <string name="clear">Clear</string>
+
+
+</resources>

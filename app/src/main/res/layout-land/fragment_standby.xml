@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/white"
+    android:padding="10dp"
+    tools:context=".StandbyFragment">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:gravity="center_vertical"
+        android:baselineAligned="false"
+        android:orientation="vertical">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:baselineAligned="false"
+            android:orientation="horizontal">
+
+            <ImageView
+                android:src="@drawable/ic_hand_solid_black"
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:layout_margin="10dp"/>
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/on_standby"
+                android:textSize="45sp"/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
+                android:layout_marginEnd="20dp"
+                android:text="@string/patient_not_ventilated"
+                android:textSize="35sp"/>
+
+        </LinearLayout>
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_margin="10dp"
+            android:background="@color/black"/>
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="10dp"
+            android:baselineAligned="false"
+            android:orientation="horizontal">
+
+            <Button
+                android:id="@+id/new_patient_button"
+                android:layout_width="250dp"
+                android:layout_height="110dp"
+                android:text="@string/new_patient"
+                android:textSize="22sp"/>
+
+            <Button
+                android:id="@+id/same_patient_button"
+                android:layout_width="250dp"
+                android:layout_height="110dp"
+                android:layout_marginStart="30dp"
+                android:text="@string/same_patient"
+                android:textSize="22sp"/>
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:layout_marginStart="30dp"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/last_system_check"
+                android:textSize="30sp"/>
+
+            <TextView
+                android:id="@+id/system_check_date_textView"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="10dp"
+                android:text="@string/date_textView"
+                android:textSize="10sp"/>
+
+        </LinearLayout>
+
+        <Button
+            android:id="@+id/shut_down_button"
+            android:layout_width="225dp"
+            android:layout_height="100dp"
+            android:layout_marginStart="10dp"
+            android:drawableStart="@drawable/ic_power_symbol"
+            android:drawableTint="@color/white"
+            android:padding="15dp"
+            android:text="@string/_shut_down"
+            android:textSize="18sp"/>
+
+    </LinearLayout>
+
+</FrameLayout>

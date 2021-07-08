@@ -1,0 +1,380 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".AlarmLimitsTabFragment">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:background="@color/white">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:orientation="horizontal">
+
+            <LinearLayout
+                android:layout_width="100dp"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="20dp"
+                android:gravity="center"
+                android:orientation="vertical">
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="60dp"/>
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="80dp"
+                    android:gravity="center"
+                    android:text="@string/high"
+                    android:textSize="24sp"/>
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="80dp"
+                    android:gravity="center"
+                    android:text="@string/current"
+                    android:textSize="24sp" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="80dp"
+                    android:gravity="center"
+                    android:text="@string/low"
+                    android:textSize="24sp"/>
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="120dp"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="20dp"
+                android:gravity="center"
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="30dp"
+                    android:gravity="center"
+                    android:text="@string/pressure"
+                    android:textSize="20sp"/>
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="30dp"
+                    android:gravity="center"
+                    android:text="@string/parenthesis_cmh20"
+                    android:textSize="20sp"/>
+
+                <Button
+                    android:id="@+id/pressure_upper_limit_button"
+                    android:layout_width="match_parent"
+                    android:layout_height="85dp"
+                    android:text="@string/dash"
+                    android:textSize="22sp"/>
+
+                <TextView
+                    android:id="@+id/pressure_current_textView"
+                    android:layout_width="match_parent"
+                    android:layout_height="60dp"
+                    android:gravity="center"
+                    android:text="@string/dash"
+                    android:textSize="22sp"/>
+
+                <Button
+                    android:id="@+id/pressure_lower_limit_button"
+                    android:layout_width="match_parent"
+                    android:layout_height="85dp"
+                    android:text="@string/dash"
+                    android:textSize="22sp"/>
+
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="120dp"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:layout_marginEnd="20dp"
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="30dp"
+                    android:gravity="center"
+                    android:text="@string/pip"
+                    android:textSize="20sp"/>
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="30dp"
+                    android:gravity="center"
+                    android:text="@string/parenthesis_cmh20"
+                    android:textSize="20sp"/>
+
+                <Button
+                    android:id="@+id/pip_upper_limit_button"
+                    android:layout_width="match_parent"
+                    android:layout_height="85dp"
+                    android:text="@string/dash"
+                    android:textSize="22sp"/>
+
+                <TextView
+                    android:id="@+id/pip_current_textView"
+                    android:layout_width="match_parent"
+                    android:layout_height="60dp"
+                    android:gravity="center"
+                    android:text="@string/dash"
+                    android:textSize="22sp"/>
+
+                <Button
+                    android:id="@+id/pip_lower_limit_button"
+                    android:layout_width="match_parent"
+                    android:layout_height="85dp"
+                    android:text="@string/dash"
+                    android:textSize="22sp"/>
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="120dp"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="20dp"
+                android:gravity="center"
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="30dp"
+                    android:gravity="center"
+                    android:text="@string/peep"
+                    android:textSize="20sp"/>
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="30dp"
+                    android:gravity="center"
+                    android:text="@string/parenthesis_cmh20"
+                    android:textSize="20sp"/>
+
+                <Button
+                    android:id="@+id/peep_upper_limit_button"
+                    android:layout_width="match_parent"
+                    android:layout_height="85dp"
+                    android:text="@string/dash"
+                    android:textSize="22sp"/>
+
+                <TextView
+                    android:id="@+id/peep_current_textView"
+                    android:layout_width="match_parent"
+                    android:layout_height="60dp"
+                    android:gravity="center"
+                    android:text="@string/dash"
+                    android:textSize="22sp"/>
+
+                <Button
+                    android:id="@+id/peep_lower_limit_button"
+                    android:layout_width="match_parent"
+                    android:layout_height="85dp"
+                    android:text="@string/dash"
+                    android:textSize="22sp"/>
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="120dp"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="20dp"
+                android:gravity="center"
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="30dp"
+                    android:gravity="center"
+                    android:text="@string/vt"
+                    android:textSize="20sp"/>
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="30dp"
+                    android:gravity="center"
+                    android:text="@string/parenthesis_ml"
+                    android:textSize="20sp"/>
+
+                <Button
+                    android:id="@+id/vt_upper_limit_button"
+                    android:layout_width="match_parent"
+                    android:layout_height="85dp"
+                    android:text="@string/dash"
+                    android:textSize="22sp"/>
+
+                <TextView
+                    android:id="@+id/vt_current_textView"
+                    android:layout_width="match_parent"
+                    android:layout_height="60dp"
+                    android:gravity="center"
+                    android:text="@string/dash"
+                    android:textSize="22sp"/>
+
+                <Button
+                    android:id="@+id/vt_lower_limit_button"
+                    android:layout_width="match_parent"
+                    android:layout_height="85dp"
+                    android:text="@string/dash"
+                    android:textSize="22sp"/>
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="120dp"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="20dp"
+                android:gravity="center"
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="30dp"
+                    android:gravity="center"
+                    android:text="@string/m_vol"
+                    android:textSize="20sp"/>
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="30dp"
+                    android:gravity="center"
+                    android:text="@string/parenthesis_l_min"
+                    android:textSize="20sp"/>
+
+                <Button
+                    android:id="@+id/mVol_upper_limit_button"
+                    android:layout_width="match_parent"
+                    android:layout_height="85dp"
+                    android:text="@string/dash"
+                    android:textSize="22sp"/>
+
+                <TextView
+                    android:id="@+id/mVol_current_textView"
+                    android:layout_width="match_parent"
+                    android:layout_height="60dp"
+                    android:gravity="center"
+                    android:text="@string/dash"
+                    android:textSize="22sp"/>
+
+                <Button
+                    android:id="@+id/mVol_lower_limit_button"
+                    android:layout_width="match_parent"
+                    android:layout_height="85dp"
+                    android:text="@string/dash"
+                    android:textSize="22sp"/>
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="120dp"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="30dp"
+                    android:gravity="center"
+                    android:text="@string/r_rate"
+                    android:textSize="20sp"/>
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="30dp"
+                    android:gravity="center"
+                    android:text="@string/parenthesis_bpm"
+                    android:textSize="20sp"/>
+
+                <Button
+                    android:id="@+id/rRate_upper_limit_button"
+                    android:layout_width="match_parent"
+                    android:layout_height="85dp"
+                    android:text="@string/dash"
+                    android:textSize="22sp"/>
+
+                <TextView
+                    android:id="@+id/rRate_current_textView"
+                    android:layout_width="match_parent"
+                    android:layout_height="60dp"
+                    android:gravity="center"
+                    android:text="@string/dash"
+                    android:textSize="18sp"/>
+
+                <Button
+                    android:id="@+id/rRate_lower_limit_button"
+                    android:layout_width="match_parent"
+                    android:layout_height="85dp"
+                    android:text="@string/dash"
+                    android:textSize="22sp"/>
+
+            </LinearLayout>
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="15dp"
+            android:layout_gravity="bottom"
+            android:gravity="center"
+            android:baselineAligned="false"
+            android:orientation="horizontal">
+
+            <Button
+                android:id="@+id/minus_button"
+                android:layout_width="80dp"
+                android:layout_height="80dp"
+                android:text="@string/dash"
+                android:textSize="30sp"/>
+
+            <TextView
+                android:id="@+id/seekBar_min_textView"
+                android:layout_width="60dp"
+                android:layout_height="wrap_content"
+                android:layout_margin="20dp"
+                android:gravity="center"
+                android:text="@string/min"
+                android:textSize="24sp"/>
+
+            <SeekBar
+                android:id="@+id/seekBar"
+                style="@style/MySeekBar"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:progressDrawable="@android:color/transparent"/>
+
+            <TextView
+                android:id="@+id/seekBar_max_textView"
+                android:layout_width="60dp"
+                android:layout_height="wrap_content"
+                android:layout_margin="20dp"
+                android:gravity="center"
+                android:text="@string/max"
+                android:textSize="24sp"/>
+
+            <Button
+                android:id="@+id/plus_button"
+                android:layout_width="80dp"
+                android:layout_height="80dp"
+                android:text="@string/plus"
+                android:textSize="30sp"/>
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+</FrameLayout>
