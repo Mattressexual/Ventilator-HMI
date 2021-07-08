@@ -84,6 +84,7 @@ public class MainActivity extends AppCompatActivity implements SerialInputOutput
 
     Resources resources;
     ArrayList<Alarm> alarmList;
+    ArrayList<AlarmPopupRow> alarmRowList;
 
     // Alarm debugging variable (increments how many alarms have been added)
     int alarmNumber = 0;
@@ -401,7 +402,7 @@ public class MainActivity extends AppCompatActivity implements SerialInputOutput
         LinearLayout alarmPopupLayout = alarmPopupView.findViewById(R.id.alarm_popup_linearLayout);
         PopupWindow alarmPopupWindow = new PopupWindow(alarmPopupView, 800, ViewGroup.LayoutParams.WRAP_CONTENT, false);
 
-        ArrayList<AlarmPopupRow> alarmRowList = new ArrayList<>();
+        alarmRowList = new ArrayList<>();
         model.getAlarm().observe(this, alarm -> {
             model.addActiveAlarm(alarm);
             alarmList = model.getActiveAlarmList().getValue();
@@ -416,6 +417,18 @@ public class MainActivity extends AppCompatActivity implements SerialInputOutput
                 moreAlarmsButton.setText(moreString);
 
                 AlarmPopupRow alarmRow = new AlarmPopupRow(this, alarm, resources.getColor(R.color.orange), resources.getColor(R.color.white));
+                alarmRow.button.setOnClickListener(clear -> {
+                    alarmRowList.remove(alarmRow);
+                    alarmPopupLayout.removeView(alarmRow.linearLayout);
+                    model.clearActiveAlarm(alarm);
+                    alarmList = model.getActiveAlarmList().getValue();
+                    if (alarmList.size() <= 1) {
+                        moreAlarmsButton.setVisibility(View.INVISIBLE);
+                    } else {
+                        String newMoreString = alarmList.size() - 1 + " MORE";
+                        moreAlarmsButton.setText(newMoreString);
+                    }
+                });
                 alarmPopupLayout.addView(alarmRow.linearLayout);
                 alarmRowList.add(alarmRow);
             }
@@ -660,7 +673,6 @@ class AlarmPopupRow {
         linearLayout.setGravity(Gravity.CENTER);
         linearLayout.setBackgroundColor(backgroundColor);
         linearLayout.setLayoutParams(layoutParams);
-
 
         LinearLayout.LayoutParams textViewParams = new LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT);
         textViewParams.weight = 1.0f;
