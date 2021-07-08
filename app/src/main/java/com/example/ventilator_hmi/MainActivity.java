@@ -40,15 +40,26 @@ import java.util.Date;
 
 public class MainActivity extends AppCompatActivity implements SerialInputOutputManager.Listener {
 
+    // IMPORTANT: Commands to set vent params and start/stop ventilation is at line 495
+
+    // Enum for USB permission (Not sure if actually used for anything.) // TODO Get rid of enum?
     private enum UsbPermission { Granted, Denied, Requested, Unknown }
     private UsbPermission usbPermission = UsbPermission.Unknown;
 
+    // Strings constants for BroadcastReceiver actions
     final String INTENT_ACTION_GRANT_USB = BuildConfig.APPLICATION_ID + ".GRANT_USB";
     final String INTENT_ACTION_USB_PERMISSION = BuildConfig.APPLICATION_ID + ".USB_PERMISSION";
     final String INTENT_ACTION_USB_STATE_CHANGE = "android.hardware.usb.action.USB_STATE"; // BuildConfig.APPLICATION_ID + ".USB_STATE";
 
+    // Custom made ViewModel
+    // Note: When "getting" variables from the ViewModel, the IDE will warn about possible NullPointerException
+    // However this will not ever happen as all variables are given a default starting value.
     CustomViewModel model;
+
+    // Indices for which tab to select in Settings Fragment. Could just be magic numbers but would rather define them here.
     int ventTabIndex = 0, alarmTabIndex = 1;
+
+    // UI elements
     Button
             standbyButton, settingsButton, alarmLimitsButton, logButton, moreButton,
             bt1, peepButton, bt3, iTimeButton, iPauseButton, fio2Button, pTriggerButton,
@@ -58,11 +69,12 @@ public class MainActivity extends AppCompatActivity implements SerialInputOutput
             bt1_typeTextView, bt1_unitTextView, bt3_typeTextView, alarmBarTextView;
     LinearLayout alarmBarLayout;
 
+    // Fragment stuff
     FragmentManager fragmentManager;
     Fragment standbyFragment, settingsFragment, logFragment;
 
+    // USB stuff
     BroadcastReceiver usbReceiver;
-
     UsbManager usbManager;
     UsbDevice device;
     UsbDeviceConnection connection;
@@ -70,31 +82,23 @@ public class MainActivity extends AppCompatActivity implements SerialInputOutput
     SerialInputOutputManager ioManager;
     Handler mainLooper;
 
-    boolean showingAlarms = false;
     Resources resources;
     ArrayList<Alarm> alarmList;
-    PopupWindow alarmPopupWindow;
-    View alarmPopupView;
-    int alarmNumber = 0;
 
-    @Override
-    public void onWindowFocusChanged(boolean hasFocus) {
-        super.onWindowFocusChanged(hasFocus);
-        if (hasFocus) {
-            getWindow().getDecorView().setSystemUiVisibility(
-                    View.SYSTEM_UI_FLAG_LAYOUT_STABLE | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
-                            | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
-                            | View.SYSTEM_UI_FLAG_FULLSCREEN | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY);
-        }
-    }
+    // Alarm debugging variable (increments how many alarms have been added)
+    int alarmNumber = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        if (getSupportActionBar() != null) { getSupportActionBar().hide(); }
+        if (getSupportActionBar() != null) { getSupportActionBar().hide(); } // Hides action bar
+
+        // ViewModel for MVVM pattern. CustomViewModel holds variables and app state booleans for triggering events.
+        // MainActivity is the "owner" of the ViewModel and child Fragments can access it freely.
         model = new ViewModelProvider(this).get(CustomViewModel.class);
 
+        // BroadcastReceiver to detect USB events. TODO: Detect USB attached/detached events to properly reconnect on attach/disconnect on detach
         usbReceiver = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
@@ -116,13 +120,17 @@ public class MainActivity extends AppCompatActivity implements SerialInputOutput
         mainLooper = new Handler(Looper.getMainLooper());
         registerReceiver(usbReceiver, new IntentFilter(INTENT_ACTION_GRANT_USB));
 
+        // ViewModel boolean "attemptUsbConnect" observer.
+        // Boolean becomes true when a connection attempt needs to be made. Flips to false after.
         model.getAttemptUsbConnect().observe(this, attempt -> {
             if (attempt) {
-                connect();
-                model.setAttemptUsbConnect(false);
+                connect(); // connect() function defined further below.
+                model.setAttemptUsbConnect(false); // Flip boolean to false after attempt is made.
             }
         });
 
+        // ViewModel boolean "usbConnected" observer.
+        // Watches for connection state. If it observes true, make a Toast, else try to connect.
         model.getUsbConnected().observe(this, connected -> {
             if (connected)
                 Toast.makeText(this, "Device connected!", Toast.LENGTH_SHORT).show();
@@ -130,30 +138,38 @@ public class MainActivity extends AppCompatActivity implements SerialInputOutput
                 model.setAttemptUsbConnect(true);
         });
 
-        // Start with StandbyFragment
         fragmentManager = getSupportFragmentManager();
+
+        // If no saved state, app starts with StandbyFragment
         if (savedInstanceState == null) {
+            // Initialize Fragments. No WaveformFragment yet. Settings Fragment creates that when ventilation starts.
             standbyFragment = new StandbyFragment();
             settingsFragment = new SettingsFragment();
             logFragment = new LogFragment();
 
+            // Add all Fragments to container, but only show StandbyFragment.
             fragmentManager.beginTransaction()
                     .add(R.id.fragment_container_view, standbyFragment, Constants.STANDBY_FRAGMENT)
                     .add(R.id.fragment_container_view, settingsFragment, Constants.SETTINGS_FRAGMENT)
                     .hide(settingsFragment)
                     .add(R.id.fragment_container_view, logFragment, Constants.LOG_FRAGMENT)
                     .hide(logFragment)
-                    .addToBackStack(Constants.STANDBY_FRAGMENT)
+                    .addToBackStack(Constants.STANDBY_FRAGMENT) // addToBackStack manually adds a String tag to the backstack to identify the last Fragment activity.
                     .commit();
         }
 
-        resources = getResources();
+        resources = getResources(); // Resources for getting color by int.
 
+        // Initializing UI elements
+
+        // Side
         standbyButton = findViewById(R.id.standby_button);
         settingsButton = findViewById(R.id.settings_button);
         alarmLimitsButton = findViewById(R.id.alarm_limits_button);
         logButton = findViewById(R.id.log_button);
         moreButton = findViewById(R.id.more_button);
+
+        // Top
         alarmSilenceButton = findViewById(R.id.alarm_silence_button);
         fullOxygenButton = findViewById(R.id.full_oxygen_button);
         alarmBarLayout = findViewById(R.id.alarm_bar_view);
@@ -161,6 +177,7 @@ public class MainActivity extends AppCompatActivity implements SerialInputOutput
         moreAlarmsButton = findViewById(R.id.more_alarms_button);
         clearAlarmButton = findViewById(R.id.clear_alarm_button);
 
+        // Bottom
         bt1 = findViewById(R.id.bt1);
         peepButton = findViewById(R.id.peep_button);
         bt3 = findViewById(R.id.bt3);
@@ -179,21 +196,27 @@ public class MainActivity extends AppCompatActivity implements SerialInputOutput
         fio2_valTextView = findViewById(R.id.fio2_val_textView);
         pTrigger_valTextView = findViewById(R.id.pTrigger_val_textView);
 
+
         standbyButton.setOnClickListener(v -> {
+            // If ViewModel says ventilator is running
             if (model.getVentRunning().getValue()) {
+                // Standby button will create popup prompt to confirm ventilation stop.
                 LayoutInflater inflater = (LayoutInflater) this.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
                 View stopVentPopupView = inflater.inflate(R.layout.popup_stopvent, null);
                 PopupWindow popupWindow = new PopupWindow(stopVentPopupView, ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT, true);
-                popupWindow.showAtLocation(v, Gravity.CENTER, 0, 0);
+                popupWindow.showAtLocation(v, Gravity.CENTER, 0, 0); // Appears in center of screen
 
+                // Continue button in the popup (Cancels ventilation stop)
                 Button continueVentButton = stopVentPopupView.findViewById(R.id.continue_vent_button);
                 continueVentButton.setOnClickListener(cont -> popupWindow.dismiss() );
 
+                // Stop Ventilation button confirms ventilation stop
                 Button stopVentButton = stopVentPopupView.findViewById(R.id.stop_vent_button);
                 stopVentButton.setOnClickListener(stop -> {
                     popupWindow.dismiss();
                     model.setVentRunning(false);
 
+                    // Switches back to StandbyFragment, hides current fragment (found by tag.)
                     String current = fragmentManager.getBackStackEntryAt(fragmentManager.getBackStackEntryCount() - 1).getName();
                     if (!current.equals(Constants.STANDBY_FRAGMENT)) {
                         Fragment standbyFragment = fragmentManager.findFragmentByTag(Constants.STANDBY_FRAGMENT);
@@ -205,20 +228,24 @@ public class MainActivity extends AppCompatActivity implements SerialInputOutput
                     }
                 });
             } else {
+                // If not ventilating, switch back to StandbyFragment and hide all Fragments
+                // Except for VentilationTabFragment and AlarmLimitsTabFragment
+                // SettingsFragment holds these so they hide with it. No need to hide them manually.
+                // Hiding them makes them disappear within SettingsFragment.
+
                 FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
                 for (Fragment fragment : fragmentManager.getFragments()) {
                     if (!fragment.getTag().equals(Constants.VENTILATION_TAB)
                             && !fragment.getTag().equals(Constants.ALARM_LIMITS_TAB))
                         fragmentTransaction.hide(fragment);
                 }
-
                 standbyFragment = fragmentManager.findFragmentByTag(Constants.STANDBY_FRAGMENT);
+                // If StandbyFragment somehow got destroyed, create a new one. Otherwise show the existing one.
                 if (standbyFragment == null) {
                     standbyFragment = new StandbyFragment();
                     fragmentTransaction.add(R.id.fragment_container_view, standbyFragment, Constants.STANDBY_FRAGMENT);
                 } else
                     fragmentTransaction.show(standbyFragment);
-
                 fragmentTransaction
                         .addToBackStack(Constants.STANDBY_FRAGMENT)
                         .commit();
@@ -226,32 +253,41 @@ public class MainActivity extends AppCompatActivity implements SerialInputOutput
         });
 
         settingsButton.setOnClickListener(v -> {
+            // Check USB connection. If not connected, attempt USB connection.
             if (!model.getUsbConnected().getValue())
                 model.setAttemptUsbConnect(true);
 
+            // If USB connected or debugging without USB device (debug changed in ViewModel manually)
             if (model.getUsbConnected().getValue() || model.getDebug().getValue()) {
-
+                // Set tab to be selected in SettingsFragment to be 0 (VentilationTabFragment)
                 model.setTabSelected(ventTabIndex);
+                // String tag for current Fragment shown
                 String current = fragmentManager.getBackStackEntryAt(fragmentManager.getBackStackEntryCount() - 1).getName();
+
                 if (model.getVentRunning().getValue())
+                    // If ventilating, set ViewModel boolean for resetting the sliders and values to the currently selected values
                     model.setTempReset(true);
                 else
+                    // Otherwise, set them to default values
                     model.setResetDefault(true);
+                // If currently not on SettingsFragment
                 if (!current.equals(Constants.SETTINGS_FRAGMENT)) {
                     FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-
+                    // Hide all Fragments except VentilationTabFragment and AlarmLimitsTabFragment
+                    // Hiding these manually makes them disappear even when SettingsFragment is shown again, instead displaying blank tabs.
+                    // Just let them appear and disappear with SettingsFragment
                     for (Fragment fragment : fragmentManager.getFragments())
                         if (!fragment.getTag().equals(Constants.VENTILATION_TAB)
                                 && !fragment.getTag().equals(Constants.ALARM_LIMITS_TAB))
                             fragmentTransaction.hide(fragment);
 
                     settingsFragment = fragmentManager.findFragmentByTag(Constants.SETTINGS_FRAGMENT);
+                    // If SettingsFragment somehow got destroyed, create a new one, otherwise show the existing one.
                     if (settingsFragment == null) {
                         settingsFragment = new SettingsFragment();
                         fragmentTransaction.add(R.id.fragment_container_view, settingsFragment, Constants.SETTINGS_FRAGMENT);
                     } else
                         fragmentTransaction.show(settingsFragment);
-
                     fragmentTransaction
                             .addToBackStack(Constants.SETTINGS_FRAGMENT)
                             .commit();
@@ -260,10 +296,13 @@ public class MainActivity extends AppCompatActivity implements SerialInputOutput
         });
 
         alarmLimitsButton.setOnClickListener(v -> {
+            // Attempt USB connection and continue of connected
             if (!model.getUsbConnected().getValue())
                 model.setAttemptUsbConnect(true);
 
             if (model.getUsbConnected().getValue()) {
+                // Alarm Limits button essentially does exactly the same thing as Settings button.
+                // But instead opens on AlarmLimitsTabFragment instead of VentilationTabFragment.
                 model.setTabSelected(alarmTabIndex);
                 String current = fragmentManager.getBackStackEntryAt(fragmentManager.getBackStackEntryCount() - 1).getName();
                 if (model.getVentRunning().getValue())
@@ -287,6 +326,7 @@ public class MainActivity extends AppCompatActivity implements SerialInputOutput
         });
 
         logButton.setOnClickListener(v -> {
+            // Opens LogFragment
             logFragment = fragmentManager.findFragmentByTag(Constants.LOG_FRAGMENT);
 
             FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
@@ -297,6 +337,8 @@ public class MainActivity extends AppCompatActivity implements SerialInputOutput
             if (currentFragment != null)
                 fragmentTransaction.hide(currentFragment);
 
+            // If LogFragment exists, show, otherwise create new one.
+            // Note: LogFragment does not add to backstack and always returns to previous Fragment when closed.
             if (logFragment == null)  {
                 logFragment = new LogFragment();
                 fragmentTransaction.add(R.id.fragment_container_view, logFragment, Constants.LOG_FRAGMENT);
@@ -306,45 +348,52 @@ public class MainActivity extends AppCompatActivity implements SerialInputOutput
         });
 
         moreButton.setOnClickListener(v -> {
-
+            // TODO: More options
         });
 
         alarmSilenceButton.setOnClickListener(v -> {
             // TODO: Implement alarm silence mode
-
         });
 
         alarmNumber = 0;
         fullOxygenButton.setOnClickListener(v -> {
             // TODO: Implement 100% oxygen mode
 
+            // Note: Currently used as Alarm debugging button
+            // Adds alarm the same way a byte buffer from the USB SerialPort would append the buffer to the ViewModel.
             model.appendReceiveBuffer("[ALARM] " + alarmNumber + "\n");
             alarmNumber++;
         });
 
+        // Observe new buffer data arriving
         model.getReceiveBuffer().observe(this, buffer -> {
-            // Toast.makeText(this, model.getReceiveBuffer().getValue(), Toast.LENGTH_SHORT).show();
+            // If the buffer contains something
             if (buffer.length() > 0) {
+                // Split it by rows
                 String[] rows = buffer.split("\n");
 
+                // Give each row a turn at being the current row in the ViewModel
+                // Stop before the last row.
                 for (int i = 0; i < rows.length - 1; i++) {
                     model.setBufferRow(rows[i]);
                 }
-
+                // If the buffer ends with newline, then there is no need to stop, so set last row as current row.
                 if (buffer.endsWith("\n")) {
                     model.setBufferRow(rows[rows.length - 1]);
-                    model.setReceiveBuffer("");
+                    model.setReceiveBuffer(""); // Reset buffer.
                 } else
+                    // Otherwise there is still more text to arrive and so save the last row for incoming appending.
                     model.setReceiveBuffer(rows[rows.length - 1]);
             }
         });
 
+        // Observe new rows as they are processed
         model.getBufferRow().observe(this, row -> {
+            // Split row into tokens by whitespace
             String[] tokens = row.split(" ");
-
-            if (tokens[0].equals("[ALARM]")) {
+            // Alarm check. If leading alarm tag found, parse row for alarm data and add alarm to ViewModel.
+            if (tokens[0].equals("[ALARM]"))
                 model.setAlarm(new Alarm(tokens[1], null, new Date(), null));
-            }
         });
 
         LayoutInflater inflater = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
@@ -380,8 +429,18 @@ public class MainActivity extends AppCompatActivity implements SerialInputOutput
         });
 
         clearAlarmButton.setOnClickListener(clear -> {
+            alarmList = model.getActiveAlarmList().getValue();
             model.clearActiveAlarm(alarmList.get(0));
-            ArrayList<Alarm> alarmList = model.getActiveAlarmList().getValue();
+            alarmList = model.getActiveAlarmList().getValue();
+
+            if (!alarmRowList.isEmpty()) {
+                alarmPopupLayout.removeViewAt(0);
+                alarmRowList.remove(0);
+
+                if (alarmRowList.isEmpty())
+                    if (alarmPopupWindow.isShowing())
+                        alarmPopupWindow.dismiss();
+            }
 
             if (alarmList.isEmpty()) {
                 alarmBarTextView.setText(R.string.no_alarms);
@@ -390,13 +449,19 @@ public class MainActivity extends AppCompatActivity implements SerialInputOutput
             } else {
                 alarmBarTextView.setText(alarmList.get(0).getAlarmText());
 
-                if (alarmList.size() == 1) {
+                if (alarmList.size() == 1)
                     moreAlarmsButton.setVisibility(View.INVISIBLE);
+                else {
+                    String moreString = alarmList.size() - 1 + " MORE";
+                    moreAlarmsButton.setText(moreString);
                 }
             }
         });
 
+        // Observers for venting parameters for bottom buttons
         model.getVentMode().observe(this, ventMode -> {
+            // Change text for bottom buttons 1 and 3 to the corresponding value names and units (i.e. PIP in cmH20, VT in mL, etc)
+            // Set text using conditional operators with ventMode value as predicate
             bt1_typeTextView.setText(ventMode == 0 ? R.string.pip : ventMode == 1 ? R.string.vt : R.string.p_support);
             bt1_valTextView.setText(
                     ventMode == 0 ? String.valueOf(model.getPip().getValue() + Constants.MIN_PIP) :
@@ -426,6 +491,7 @@ public class MainActivity extends AppCompatActivity implements SerialInputOutput
         model.getFio2().observe(this, fio2 -> fio2_valTextView.setText(String.valueOf(fio2 + Constants.MIN_FIO2)));
         model.getPTrigger().observe(this, pTrigger -> pTrigger_valTextView.setText(String.valueOf(pTrigger + Constants.MIN_PTRIGGER)));
 
+        // IMPORTANT: This is where the commands for starting and stopping ventilation are
         model.getVentRunning().observe(this, ventRunning -> {
             if (ventRunning) {
                 // TODO: Set vent params here
@@ -433,7 +499,7 @@ public class MainActivity extends AppCompatActivity implements SerialInputOutput
 
 
                 send("set vent true");
-                // send("readings");
+                send("readings");
             } else
                 send("set vent false");
         });
@@ -519,6 +585,7 @@ public class MainActivity extends AppCompatActivity implements SerialInputOutput
         port = null;
     }
 
+    // Method for sending data across serial connection
     private void send(String string) {
         if (!model.getUsbConnected().getValue()) {
             Toast.makeText(this, "No device connected", Toast.LENGTH_SHORT).show();
@@ -533,33 +600,39 @@ public class MainActivity extends AppCompatActivity implements SerialInputOutput
         }
     }
 
+    // Implementing SerialListener gives these methods that are called automatically when data is sent across the serial connection.
     @Override
     public void onNewData(byte[] data) {
         mainLooper.post(() -> {
-                String receivedData = new String(data);
-                model.appendReceiveBuffer(receivedData);
+            String receivedData = new String(data); // Convert from bytes to String
+            model.appendReceiveBuffer(receivedData); // Append to receiveBuffer in ViewModel to be observed by observers elsewhere.
         });
     }
 
     @Override
-    public void onRunError(Exception e) {
-        disconnect();
-    }
+    public void onRunError(Exception e) { disconnect(); } // If error, sever connection
 
     @Override
     protected void onResume() {
         super.onResume();
-        this.registerReceiver(usbReceiver, new IntentFilter(INTENT_ACTION_GRANT_USB));
+        this.registerReceiver(usbReceiver, new IntentFilter(INTENT_ACTION_GRANT_USB)); // Register receiver again
     }
 
     @Override
     protected void onPause() {
         super.onPause();
-        this.unregisterReceiver(usbReceiver);
+        this.unregisterReceiver(usbReceiver); // Unregister receiver when not needed
     }
 
     @Override
     public void onBackPressed() { /* Empty body without calling super.onBackPressed() in this function essentially disables the back button */ }
+
+    // Set Fullscreen (Out of date way of doing it but couldn't find any documentation on something more current)
+    @Override
+    public void onWindowFocusChanged(boolean hasFocus) {
+        super.onWindowFocusChanged(hasFocus);
+        if (hasFocus) getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_STABLE | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION | View.SYSTEM_UI_FLAG_FULLSCREEN | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY);
+    }
 }
 
 class AlarmPopupRow {
