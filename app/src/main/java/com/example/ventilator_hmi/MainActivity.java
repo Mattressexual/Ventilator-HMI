@@ -36,11 +36,10 @@ import com.hoho.android.usbserial.util.SerialInputOutputManager;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Date;
+import java.util.Random;
 
+// Implementing interface gives onNewData(byte[] bytes) method
 public class MainActivity extends AppCompatActivity implements SerialInputOutputManager.Listener {
-
-    // IMPORTANT: Commands to set vent params and start/stop ventilation is at line 495
 
     // Enum for USB permission (Not sure if actually used for anything.) // TODO Get rid of enum?
     private enum UsbPermission { Granted, Denied, Requested, Unknown }
@@ -49,7 +48,6 @@ public class MainActivity extends AppCompatActivity implements SerialInputOutput
     // Strings constants for BroadcastReceiver actions
     final String INTENT_ACTION_GRANT_USB = BuildConfig.APPLICATION_ID + ".GRANT_USB";
     final String INTENT_ACTION_USB_PERMISSION = BuildConfig.APPLICATION_ID + ".USB_PERMISSION";
-    final String INTENT_ACTION_USB_STATE_CHANGE = "android.hardware.usb.action.USB_STATE"; // BuildConfig.APPLICATION_ID + ".USB_STATE";
 
     // Custom made ViewModel
     // Note: When "getting" variables from the ViewModel, the IDE will warn about possible NullPointerException
@@ -80,14 +78,17 @@ public class MainActivity extends AppCompatActivity implements SerialInputOutput
     UsbDeviceConnection connection;
     UsbSerialPort port;
     SerialInputOutputManager ioManager;
-    Handler mainLooper;
 
     Resources resources;
     ArrayList<Alarm> alarmList;
     ArrayList<AlarmPopupRow> alarmRowList;
 
+    Handler mainLooper;
+
     // Alarm debugging variable (increments how many alarms have been added)
     int alarmNumber = 0;
+
+    String tempBuffer = "";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -104,10 +105,8 @@ public class MainActivity extends AppCompatActivity implements SerialInputOutput
             @Override
             public void onReceive(Context context, Intent intent) {
                 String action = intent.getAction();
-                if (
-                        action.equals(INTENT_ACTION_GRANT_USB) ||
-                        action.equals(INTENT_ACTION_USB_PERMISSION) ||
-                        action.equals(INTENT_ACTION_USB_STATE_CHANGE)) {
+                if (action.equals(INTENT_ACTION_GRANT_USB)
+                        || action.equals(INTENT_ACTION_USB_PERMISSION)) {
 
                     boolean granted = intent.getBooleanExtra(UsbManager.EXTRA_PERMISSION_GRANTED, false);
                     if (granted) {
@@ -118,26 +117,8 @@ public class MainActivity extends AppCompatActivity implements SerialInputOutput
                 }
             }
         };
-        mainLooper = new Handler(Looper.getMainLooper());
         registerReceiver(usbReceiver, new IntentFilter(INTENT_ACTION_GRANT_USB));
-
-        // ViewModel boolean "attemptUsbConnect" observer.
-        // Boolean becomes true when a connection attempt needs to be made. Flips to false after.
-        model.getAttemptUsbConnect().observe(this, attempt -> {
-            if (attempt) {
-                connect(); // connect() function defined further below.
-                model.setAttemptUsbConnect(false); // Flip boolean to false after attempt is made.
-            }
-        });
-
-        // ViewModel boolean "usbConnected" observer.
-        // Watches for connection state. If it observes true, make a Toast, else try to connect.
-        model.getUsbConnected().observe(this, connected -> {
-            if (connected)
-                Toast.makeText(this, "Device connected!", Toast.LENGTH_SHORT).show();
-            else
-                model.setAttemptUsbConnect(true);
-        });
+        mainLooper = new Handler(Looper.getMainLooper());
 
         fragmentManager = getSupportFragmentManager();
 
@@ -216,6 +197,7 @@ public class MainActivity extends AppCompatActivity implements SerialInputOutput
                 stopVentButton.setOnClickListener(stop -> {
                     popupWindow.dismiss();
                     model.setVentRunning(false);
+                    model.setReadings(false);
 
                     // Switches back to StandbyFragment, hides current fragment (found by tag.)
                     String current = fragmentManager.getBackStackEntryAt(fragmentManager.getBackStackEntryCount() - 1).getName();
@@ -294,6 +276,8 @@ public class MainActivity extends AppCompatActivity implements SerialInputOutput
                             .commit();
                 }
             }
+            else
+                Toast.makeText(this, "No device", Toast.LENGTH_SHORT).show();
         });
 
         alarmLimitsButton.setOnClickListener(v -> {
@@ -324,6 +308,8 @@ public class MainActivity extends AppCompatActivity implements SerialInputOutput
                             .commit();
                 }
             }
+            else
+                Toast.makeText(this, "No device", Toast.LENGTH_SHORT).show();
         });
 
         logButton.setOnClickListener(v -> {
@@ -349,125 +335,139 @@ public class MainActivity extends AppCompatActivity implements SerialInputOutput
         });
 
         moreButton.setOnClickListener(v -> {
-            // TODO: More options
-        });
 
-        alarmSilenceButton.setOnClickListener(v -> {
-            // TODO: Implement alarm silence mode
         });
 
         alarmNumber = 0;
+        alarmSilenceButton.setOnClickListener(v -> {
+
+        });
+
+        Random r = new Random();
         fullOxygenButton.setOnClickListener(v -> {
-            // TODO: Implement 100% oxygen mode
 
-            // Note: Currently used as Alarm debugging button
-            // Adds alarm the same way a byte buffer from the USB SerialPort would append the buffer to the ViewModel.
-            model.appendReceiveBuffer("[ALARM] " + alarmNumber + "\n");
-            alarmNumber++;
         });
 
-        // Observe new buffer data arriving
-        model.getReceiveBuffer().observe(this, buffer -> {
-            // If the buffer contains something
-            if (buffer.length() > 0) {
-                // Split it by rows
-                String[] rows = buffer.split("\n");
-
-                // Give each row a turn at being the current row in the ViewModel
-                // Stop before the last row.
-                for (int i = 0; i < rows.length - 1; i++) {
-                    model.setBufferRow(rows[i]);
-                }
-                // If the buffer ends with newline, then there is no need to stop, so set last row as current row.
-                if (buffer.endsWith("\n")) {
-                    model.setBufferRow(rows[rows.length - 1]);
-                    model.setReceiveBuffer(""); // Reset buffer.
-                } else
-                    // Otherwise there is still more text to arrive and so save the last row for incoming appending.
-                    model.setReceiveBuffer(rows[rows.length - 1]);
-            }
-        });
-
-        // Observe new rows as they are processed
-        model.getBufferRow().observe(this, row -> {
-            // Split row into tokens by whitespace
-            String[] tokens = row.split(" ");
-            // Alarm check. If leading alarm tag found, parse row for alarm data and add alarm to ViewModel.
-            if (tokens[0].equals("[ALARM]"))
-                model.setAlarm(new Alarm(tokens[1], null, new Date(), null));
-        });
-
+        // Alarm handling
+        // Create a pop-up for the Alarm dropdown.
         LayoutInflater inflater = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         View alarmPopupView = inflater.inflate(R.layout.popup_alarm_list, null);
         LinearLayout alarmPopupLayout = alarmPopupView.findViewById(R.id.alarm_popup_linearLayout);
-        PopupWindow alarmPopupWindow = new PopupWindow(alarmPopupView, 800, 400, false);
+        PopupWindow alarmPopupWindow = new PopupWindow(alarmPopupView, ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT, false);
 
+        // ArrayList of AlarmRow objects (defined below)
         alarmRowList = new ArrayList<>();
+        // Observe when a new Alarm object is set in the ViewModel
         model.getAlarm().observe(this, alarm -> {
-            model.addActiveAlarm(alarm);
-            alarmList = model.getActiveAlarmList().getValue();
+            model.addActiveAlarm(alarm); // Adds the alarm to the list of active Alarms in the ViewModel
+            alarmList = model.getActiveAlarmList().getValue(); // Get the list of active Alarms
 
+            // When there's only one Alarm and it just came in, the list must have been empty before so change color and assign text.
             if (alarmList.size() == 1) {
-                alarmBarLayout.setBackgroundColor(resources.getColor(R.color.orange));
-                alarmBarTextView.setText(alarm.getAlarmText());
-                clearAlarmButton.setVisibility(View.VISIBLE);
-            } else if (alarmList.size() > 1) {
-                moreAlarmsButton.setVisibility(View.VISIBLE);
-                String moreString = alarmList.size() - 1 + " MORE";
+                alarmBarLayout.setBackgroundColor(resources.getColor(R.color.orange)); // Alarm color can be unique and placed in the Alarm object later on
+                alarmBarTextView.setText(alarm.getAlarmText()); // Set text of Alarm
+                clearAlarmButton.setVisibility(View.VISIBLE); // Button to clear the Alarm becomes visible
+            } else if (alarmList.size() > 1) { // If there are multiple alarms
+                moreAlarmsButton.setVisibility(View.VISIBLE); // The "X More" Alarms button becomes visible.
+                String moreString = alarmList.size() - 1 + " MORE"; // Set button's text
                 moreAlarmsButton.setText(moreString);
 
-                AlarmPopupRow alarmRow = new AlarmPopupRow(this, alarm, resources.getColor(R.color.orange), resources.getColor(R.color.white));
-                alarmRow.button.setOnClickListener(clear -> {
-                    alarmRowList.remove(alarmRow);
-                    alarmPopupLayout.removeView(alarmRow.linearLayout);
-                    model.clearActiveAlarm(alarm);
-                    alarmList = model.getActiveAlarmList().getValue();
-                    if (alarmList.size() <= 1) {
+                // Create an AlarmPopupRow object to encapsulate the UI element and variables together.
+                // Note: Not the same as the AlarmRow object defined in LogFragment (very similar though)
+                AlarmPopupRow alarmRow = new AlarmPopupRow(alarmPopupLayout, alarm);
+
+                // Add the View associated with the AlarmPopupRow object to the LinearLayout in the PopupWindow.
+                alarmPopupLayout.addView(alarmRow.alarmRowView);
+                alarmRowList.add(alarmRow); // Add the object to the list that tracks them.
+
+                // AlarmPopupRow has a button to clear the associated Alarm.
+                // Clear button listener ///////////////////////////////////////////////////////////
+                alarmRow.popupClearButton.setOnClickListener(clear -> {
+                    alarmRowList.remove(alarmRow); // Remove the button's associated AlarmPopupRow from the list that tracks them.
+                    alarmPopupLayout.removeView(alarmRow.alarmRowView); // Remove from view
+                    model.clearActiveAlarm(alarm); // Clear the associated Alarm in the ViewModel (set as cleared, not remove)
+                    alarmList = model.getActiveAlarmList().getValue(); // Get the list of active Alarms
+                    if (alarmList.size() <= 1) { // If there's just one (or less somehow) Alarms, more alarms button goes away.
                         moreAlarmsButton.setVisibility(View.INVISIBLE);
-                    } else {
+                        if (alarmPopupWindow.isShowing()) // If the popup is showing, dismiss it (nothing to show anymore);
+                            alarmPopupWindow.dismiss();
+                    } else { // Otherwise if there's more Alarms, change the button text to show the right number more.
                         String newMoreString = alarmList.size() - 1 + " MORE";
                         moreAlarmsButton.setText(newMoreString);
                     }
+                    // Tells ViewModel that LogFragment has to be updated with the correct active Alarms. See LogFragment's refreshLog observer.
+                    model.setRefreshLog(true);
                 });
-                alarmPopupLayout.addView(alarmRow.linearLayout);
-                alarmRowList.add(alarmRow);
+                ////////////////////////////////////////////////////////////////////////////////////
             }
         });
 
+        // If there's more than one Alarm, toggle ScrollView.
         moreAlarmsButton.setOnClickListener(more -> {
             if (alarmPopupWindow.isShowing())
                 alarmPopupWindow.dismiss();
             else
                 alarmPopupWindow.showAsDropDown(alarmBarLayout);
         });
-
+        // Button to clear top/first Alarm.
         clearAlarmButton.setOnClickListener(clear -> {
-            alarmList = model.getActiveAlarmList().getValue();
-            model.clearActiveAlarm(alarmList.get(0));
-            alarmList = model.getActiveAlarmList().getValue();
+            alarmList = model.getActiveAlarmList().getValue(); // Get the list of active Alarms
+            model.clearActiveAlarm(alarmList.get(0)); // Clear it (not remove).
+            alarmList = model.getActiveAlarmList().getValue(); // Get the new updated list.
 
-            if (!alarmRowList.isEmpty()) {
-                alarmPopupLayout.removeViewAt(0);
-                alarmRowList.remove(0);
-
-                if (alarmRowList.isEmpty())
+            if (!alarmRowList.isEmpty()) { // If there are still Alarms more than the first (ones to be shown in PopupWindow)
+                alarmPopupLayout.removeViewAt(0); // Remove the first one's View
+                alarmRowList.remove(0); // Remove the AlarmPopupRow object from the list
+                if (alarmRowList.isEmpty()) // If there are no more AlarmPopupRows to be shown, dismiss the PopupWindow if it's showing.
                     if (alarmPopupWindow.isShowing())
                         alarmPopupWindow.dismiss();
             }
-
-            if (alarmList.isEmpty()) {
+            if (alarmList.isEmpty()) { // If there are no more Alarms, change the text back to "No Alarms" and the color to the original
                 alarmBarTextView.setText(R.string.no_alarms);
                 alarmBarLayout.setBackgroundColor(resources.getColor(R.color.design_default_color_primary));
-                clearAlarmButton.setVisibility(View.INVISIBLE);
-            } else {
+                clearAlarmButton.setVisibility(View.INVISIBLE); // Clear button goes away (nothing to clear)
+            } else { // Otherwise just change the text to the next Alarm's text.
                 alarmBarTextView.setText(alarmList.get(0).getAlarmText());
-
-                if (alarmList.size() == 1)
+                if (alarmList.size() == 1) // If there's only one Alarm, button to show PopupWindow goes away.
                     moreAlarmsButton.setVisibility(View.INVISIBLE);
-                else {
+                else { // If there are more Alarms, change text to show correct number
                     String moreString = alarmList.size() - 1 + " MORE";
                     moreAlarmsButton.setText(moreString);
                 }
+            }
+            model.setRefreshLog(true); // Tell ViewModel LogFragment has to be updated. See LogFragment's refreshLog observer.
+        });
+
+        // Observer of refreshAlarmBar LiveData in the ViewModel.
+        // If user clears Alarm in LogFragment, Alarm Bar has to be updated.
+        model.getRefreshAlarmBar().observe(this, refresh -> {
+            if (refresh) {
+                alarmRowList.clear();
+                alarmPopupLayout.removeAllViews();
+                alarmList = model.getActiveAlarmList().getValue();
+
+                if (alarmList.isEmpty()) {
+                    alarmBarTextView.setText(R.string.no_alarms);
+                    alarmBarLayout.setBackgroundColor(resources.getColor(R.color.design_default_color_primary));
+                    clearAlarmButton.setVisibility(View.INVISIBLE);
+                } else {
+                    alarmBarTextView.setText(alarmList.get(0).getAlarmText());
+                    alarmBarLayout.setBackgroundColor(resources.getColor(R.color.orange));
+                    }
+                    if (alarmList.size() == 1) {
+                        if (alarmPopupWindow.isShowing())
+                            alarmPopupWindow.dismiss();
+                        moreAlarmsButton.setVisibility(View.INVISIBLE);
+                    } else if (alarmList.size() > 1) {
+                        String moreString = alarmList.size() - 1 + " MORE";
+                        moreAlarmsButton.setText(moreString);
+                        for (int i = 1; i < alarmList.size(); i++) {
+                            AlarmPopupRow popupRow = new AlarmPopupRow(alarmPopupLayout, alarmList.get(i));
+                            alarmPopupLayout.addView(popupRow.alarmRowView);
+                            alarmRowList.add(popupRow);
+                    }
+                }
+                model.setRefreshAlarmBar(false); // When task is handled, revert state boolean.
             }
         });
 
@@ -489,38 +489,67 @@ public class MainActivity extends AppCompatActivity implements SerialInputOutput
         model.getPip().observe(this, pip -> {
             if (model.getVentMode().getValue() == 0)
                 bt1_valTextView.setText(String.valueOf(pip + Constants.MIN_PIP));
+            updateVentParam(Constants.pipPressure, model.getPip().getValue().toString());
         });
         model.getVt().observe(this, vt -> {
             if (model.getVentMode().getValue() == 1)
                 bt1_valTextView.setText(String.valueOf(vt + Constants.MIN_VT));
+
         });
         model.getPSupport().observe(this, pSupport -> {
             if (model.getVentMode().getValue() == 2)
                 bt1_valTextView.setText(String.valueOf(pSupport + Constants.MIN_PSUPPORT));
         });
-        model.getPeep().observe(this, peep -> peep_valTextView.setText(String.valueOf(peep + Constants.MIN_PEEP)));
+        model.getPeep().observe(this, peep -> {
+            peep_valTextView.setText(String.valueOf(peep + Constants.MIN_PEEP));
+            updateVentParam(Constants.peepPressure, model.getPeep().getValue().toString());
+        });
         model.getITime().observe(this, iTime -> iTime_valTextView.setText(String.valueOf(iTime + Constants.MIN_ITIME / 10f)));
         model.getIPause().observe(this, iPause -> iPause_valTextView.setText(String.valueOf(iPause + Constants.MIN_IPAUSE)));
         model.getFio2().observe(this, fio2 -> fio2_valTextView.setText(String.valueOf(fio2 + Constants.MIN_FIO2)));
         model.getPTrigger().observe(this, pTrigger -> pTrigger_valTextView.setText(String.valueOf(pTrigger + Constants.MIN_PTRIGGER)));
 
         // IMPORTANT: This is where the commands for starting and stopping ventilation are
+        // Observe ventRunning LiveData bool
         model.getVentRunning().observe(this, ventRunning -> {
+            // If ventRunning just switched to true
             if (ventRunning) {
-                // TODO: Set vent params here
-                // send("set ");
-
-
-                send("set vent true");
-                send("readings");
-            } else
-                send("set vent false");
+                updateVentParam("vent", "true");
+            } else {
+                updateVentParam("vent", "false");
+            }
+            send("readings");
         });
 
+        // ViewModel boolean "attemptUsbConnect" observer.
+        // Boolean becomes true when a connection attempt needs to be made. Flips to false after.
+        model.getAttemptUsbConnect().observe(this, attempt -> {
+            if (attempt) {
+                connect(); // connect() function defined further below.
+                model.setAttemptUsbConnect(false); // Flip boolean to false after attempt is made.
+            }
+        });
+
+        // ViewModel boolean "usbConnected" observer.
+        model.getUsbConnected().observe(this, connected -> {
+            if (connected)
+                Toast.makeText(this, "Device connected!", Toast.LENGTH_SHORT).show();
+            else
+                Toast.makeText(this, "Device not connected.", Toast.LENGTH_SHORT).show();
+        });
+
+        // Observe shutdown LiveData bool
         model.getShutdown().observe(this, shutdown -> {
-            if (shutdown)
+            if (shutdown) {
+                // If shutdown is set true, send shutdown
                 send("shutdown");
+            }
         });
+    }
+
+    // Command for updating vent params
+    private void updateVentParam(String param, String val) {
+        send(String.format("set %s %s", param, val));
     }
 
     private void connect() {
@@ -532,23 +561,15 @@ public class MainActivity extends AppCompatActivity implements SerialInputOutput
                 break;
             }
         }
-        if (device == null) {
-            Toast.makeText(this, "No device found", Toast.LENGTH_SHORT).show();
+        if (device == null)
             return;
-        }
-        UsbSerialDriver driver = UsbSerialProber.getDefaultProber().probeDevice(device);
-        if (driver == null) {
-            // TODO CustomProber if necessary
-        }
-        if (driver == null) {
-            Toast.makeText(this, "No driver found", Toast.LENGTH_SHORT).show();
-            return;
-        }
 
-        if (driver.getPorts().size() < 1) {
-            Toast.makeText(this, "No port available", Toast.LENGTH_SHORT).show();
+        UsbSerialDriver driver = UsbSerialProber.getDefaultProber().probeDevice(device);
+
+        if (driver == null)
             return;
-        }
+        if (driver.getPorts().size() < 1)
+            return;
 
         port = driver.getPorts().get(0);
         connection = usbManager.openDevice(device);
@@ -561,13 +582,8 @@ public class MainActivity extends AppCompatActivity implements SerialInputOutput
             return;
         }
 
-        if (connection == null) {
-            if (!usbManager.hasPermission(device))
-                Toast.makeText(this, "Permission for device denied.", Toast.LENGTH_SHORT).show();
-            else
-                Toast.makeText(this, "Connection to device failed to open.", Toast.LENGTH_SHORT).show();
+        if (connection == null)
             return;
-        }
 
         try {
             port.open(connection);
@@ -600,10 +616,7 @@ public class MainActivity extends AppCompatActivity implements SerialInputOutput
 
     // Method for sending data across serial connection
     private void send(String string) {
-        if (!model.getUsbConnected().getValue()) {
-            Toast.makeText(this, "No device connected", Toast.LENGTH_SHORT).show();
-        } else {
-
+        if (port != null && port.isOpen()) {
             byte[] data = (string + "\n").getBytes();
             try {
                 port.write(data, Constants.WRITE_WAIT_MILLIS);
@@ -617,8 +630,14 @@ public class MainActivity extends AppCompatActivity implements SerialInputOutput
     @Override
     public void onNewData(byte[] data) {
         mainLooper.post(() -> {
-            String receivedData = new String(data); // Convert from bytes to String
-            model.appendReceiveBuffer(receivedData); // Append to receiveBuffer in ViewModel to be observed by observers elsewhere.
+            for (byte b : data) {
+                char c = (char) b;
+                if (c == '\n') {
+                    model.setReceiveBuffer(tempBuffer);
+                    tempBuffer = "";
+                } else
+                    tempBuffer += c;
+            }
         });
     }
 
@@ -633,8 +652,16 @@ public class MainActivity extends AppCompatActivity implements SerialInputOutput
 
     @Override
     protected void onPause() {
-        super.onPause();
         this.unregisterReceiver(usbReceiver); // Unregister receiver when not needed
+        super.onPause();
+    }
+
+    @Override
+    protected void onDestroy() {
+        send("set vent false");
+        send("shutdown");
+        disconnect();
+        super.onDestroy();
     }
 
     @Override
@@ -646,59 +673,27 @@ public class MainActivity extends AppCompatActivity implements SerialInputOutput
         super.onWindowFocusChanged(hasFocus);
         if (hasFocus) getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_STABLE | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION | View.SYSTEM_UI_FLAG_FULLSCREEN | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY);
     }
-}
 
-class AlarmPopupRow {
-    Alarm alarm;
-    LinearLayout linearLayout;
-    TextView textView;
-    Button button, empty;
+    class AlarmPopupRow {
+        Alarm alarm;
+        View alarmRowView;
+        TextView popupAlarmTextView;
+        Button popupClearButton;
 
-    String clear = "Clear";
-    int backgroundColor;
-    int textColor;
-
-    AlarmPopupRow (Context context, Alarm alarm, int backgroundColor, int textColor) {
-        this.alarm = alarm;
-        this.backgroundColor = backgroundColor;
-        this.textColor = textColor;
-
-        LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, 65);
-        layoutParams.gravity = Gravity.CENTER;
-        layoutParams.setMargins(0, 5, 0, 0);
-
-        linearLayout = new LinearLayout(context);
-        linearLayout.setPadding(5, 0, 5, 0);
-        linearLayout.setOrientation(LinearLayout.HORIZONTAL);
-        linearLayout.setGravity(Gravity.CENTER);
-        linearLayout.setBackgroundColor(backgroundColor);
-        linearLayout.setLayoutParams(layoutParams);
-
-        LinearLayout.LayoutParams textViewParams = new LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT);
-        textViewParams.weight = 1.0f;
-        textView = new TextView(context);
-        textView.setLayoutParams(textViewParams);
-        textView.setText(alarm.getAlarmText());
-        textView.setGravity(Gravity.CENTER);
-        textView.setTextSize(TypedValue.COMPLEX_UNIT_SP, 20);
-        textView.setAllCaps(true);
-        textView.setTextColor(textColor);
-
-        LinearLayout.LayoutParams buttonParams = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, 60);
-        buttonParams.setMarginEnd(10);
-        button = new Button(context);
-        button.setLayoutParams(buttonParams);
-        button.setText(clear);
-
-        empty = new Button(context);
-        empty.setText(R.string.more);
-        empty.setVisibility(View.INVISIBLE);
-
-        empty.setLayoutParams(buttonParams);
-
-
-        linearLayout.addView(textView);
-        linearLayout.addView(empty);
-        linearLayout.addView(button);
+        AlarmPopupRow (LinearLayout container, Alarm alarm) {
+            this.alarm = alarm;
+            LayoutInflater inflater = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+            alarmRowView = inflater.inflate(R.layout.popup_alarm_row, null);
+            popupAlarmTextView = alarmRowView.findViewById(R.id.popup_alarm_textView);
+            popupAlarmTextView.setTextSize(TypedValue.COMPLEX_UNIT_SP, 20);
+            popupAlarmTextView.setText(alarm.getAlarmText());
+            popupClearButton = alarmRowView.findViewById(R.id.popup_alarm_clear_button);
+            popupClearButton.setOnClickListener(clear -> {
+                model.clearActiveAlarm(alarm);
+                model.setRefreshLog(true);
+                container.removeView(alarmRowView);
+                alarmRowList.remove(this);
+            });
+        }
     }
 }

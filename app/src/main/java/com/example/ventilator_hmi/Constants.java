@@ -102,5 +102,17 @@ public class Constants {
             MIN_FIO2_TEXT = String.valueOf(MIN_FIO2), MAX_FIO2_TEXT = String.valueOf(MAX_FIO2),
             MIN_PTRIGGER_TEXT = String.valueOf(MIN_PTRIGGER), MAX_PTRIGGER_TEXT = String.valueOf(MAX_PTRIGGER);
 
+    // Vent param names
+    static final String
+            ventMode = "ventMode",
+            pipPressure = "pipPressure",
+            tidalVolume = "tidalVolume",
+            peepPressure = "peepPressure",
+            breathFreq = "breathFreq",
+            insphold = "insphold", fiO2 = "fiO2",
+            pressureTrigger = "pressureTrigger",
+            inspExpRatio = "inspExpRatio";
+
+
     static final int VENDOR_ID = 0x0403, PRODUCT_ID = 0x6001, BAUD_RATE = 115200;
 }

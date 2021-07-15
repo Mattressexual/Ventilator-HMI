@@ -30,10 +30,12 @@ public class WaveformFragment extends Fragment {
     LineChart upperChart, lowerChart;
     LineDataSet upperSet, lowerSet;
     ArrayList<Entry> upperValues, lowerValues;
-    boolean upperFirstLoop = true, lowerFirstLoop = true;
+    boolean upperFirstLoop = true, lowerFirstLoop = true, ventRunning = false;
     int chartInsertIndex = 74, chartLength = 100;
     int upperChartMax = 40, upperChartMin = 0;
     int lowerChartMax = 30, lowerChartMin = -30;
+
+    float inputPress = 0f;
 
     TextView graphTitleTextView,
             peepTextView, pPlatTextView, mVolTextView, ieRatioTextView, pipTextView, vtiTextView, rRateTextView, fio2TextView;
@@ -83,9 +85,10 @@ public class WaveformFragment extends Fragment {
         upperChart.getXAxis().setDrawGridLines(false);
         upperChart.getXAxis().setDrawAxisLine(false);
         setYAxis(upperChart.getAxisLeft(), upperChartMin, upperChartMax, 3);
+
         if (upperFirstLoop) {
             upperValues = new ArrayList<>();
-            firstLoop(upperChart, upperSet, upperValues);
+            firstLoop(upperChart, upperValues);
             upperFirstLoop = false;
         }
 
@@ -99,21 +102,14 @@ public class WaveformFragment extends Fragment {
 
         if (lowerFirstLoop) {
             lowerValues = new ArrayList<>();
-            firstLoop(lowerChart, lowerSet, lowerValues);
+            firstLoop(lowerChart, lowerValues);
             lowerFirstLoop = false;
         }
 
-        model.getUpperChartValue().observe(requireActivity(), f -> {
-            if (model.getVentRunning().getValue())
-                updateChart(upperChart, upperSet, upperValues, model.getUpperChartValue().getValue());
-        });
-
-        model.getLowerChartValue().observe(requireActivity(), f -> {
-            if (model.getVentRunning().getValue())
-                updateChart(lowerChart, lowerSet, lowerValues, model.getLowerChartValue().getValue());
-        });
-
         model.getVentRunning().observe(requireActivity(), ventRunning -> {
+            this.ventRunning = ventRunning;
+
+
             if (!ventRunning) {
                 upperValues.clear();
                 lowerValues.clear();
@@ -144,23 +140,17 @@ public class WaveformFragment extends Fragment {
                 lowerFirstLoop = false;
             }
         });
+
     }
 
-    void updateChart(LineChart chart, LineDataSet set, ArrayList<Entry> values, float newValue) {
+    synchronized void updateChart(LineChart chart, ArrayList<Entry> values, float newValue) {
         values.remove(0);
         for (int i = 0; i < chartInsertIndex; i++) {
             Entry entry = values.get(i);
             entry.setX(entry.getX() - 1);
         }
         values.add(chartInsertIndex, new Entry(chartInsertIndex, newValue));
-        set = new LineDataSet(values, "");
-        set.setColor(resources.getColor(R.color.white));
-        set.setDrawCircles(false);
-        set.setMode(LineDataSet.Mode.CUBIC_BEZIER);
-        ArrayList<ILineDataSet> dataSets = new ArrayList<>();
-        dataSets.add(set);
-        LineData data = new LineData(dataSets);
-        chart.setData(data);
+        chart.notifyDataSetChanged();
         chart.invalidate();
     }
 
@@ -173,10 +163,10 @@ public class WaveformFragment extends Fragment {
         yAxis.setAxisMaximum(max);
     }
 
-    void firstLoop(LineChart chart, LineDataSet set, ArrayList<Entry> values) {
+    void firstLoop(LineChart chart, ArrayList<Entry> values) {
         for (int i = 0; i < 100; i++)
             values.add(new Entry(i, 0f));
-        set = new LineDataSet(values, "Flow");
+        LineDataSet set = new LineDataSet(values, "Flow");
         set.setColor(resources.getColor(R.color.white));
         set.setDrawCircles(false);
         set.setMode(LineDataSet.Mode.CUBIC_BEZIER);

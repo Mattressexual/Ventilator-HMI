@@ -94,6 +94,8 @@
     <string name="actions">Actions</string>
     <string name="shutdown_system">Shutdown System?</string>
     <string name="clear">Clear</string>
+    <string name="active">Active</string>
+    <string name="cleared">Cleared</string>
 
 
 </resources>

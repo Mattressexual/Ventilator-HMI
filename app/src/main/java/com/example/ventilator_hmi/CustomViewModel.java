@@ -4,10 +4,11 @@ import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
 import java.util.ArrayList;
+import java.util.Date;
 
 public class CustomViewModel extends ViewModel {
 
-    private MutableLiveData<Boolean> debug = new MutableLiveData<>(true);
+    private MutableLiveData<Boolean> debug = new MutableLiveData<>(false);
 
     private MutableLiveData<String> receiveBuffer = new MutableLiveData<>();
     private MutableLiveData<String> bufferRow = new MutableLiveData<>();
@@ -22,7 +23,8 @@ public class CustomViewModel extends ViewModel {
             tempReset = new MutableLiveData<>(),
             attemptUsbConnect = new MutableLiveData<>(),
             resetDefault = new MutableLiveData<>(),
-            shutdown = new MutableLiveData<>();
+            shutdown = new MutableLiveData<>(),
+            readings = new MutableLiveData<>();
 
     // Ventilation Tab Fragment
     private MutableLiveData<Integer> tabSelected = new MutableLiveData<>(0);
@@ -81,7 +83,10 @@ public class CustomViewModel extends ViewModel {
     // Waveform Fragment
     private MutableLiveData<Float>
             upperChartValue = new MutableLiveData<>(),
-            lowerChartValue = new MutableLiveData<>();
+            lowerChartValue = new MutableLiveData<>(),
+            inputPress = new MutableLiveData<>(),
+            dryAirInFlow = new MutableLiveData<>(),
+            oxInFlow = new MutableLiveData<>();
 
     // Log Fragment
     private MutableLiveData<Alarm> alarm = new MutableLiveData<>();
@@ -172,10 +177,16 @@ public class CustomViewModel extends ViewModel {
         // Waveform Fragment
         upperChartValue.setValue(0f);
         lowerChartValue.setValue(0f);
+        inputPress.setValue(0f);
+        dryAirInFlow.setValue(0f);
+        oxInFlow.setValue(0f);
 
         // Alarms
         activeAlarmList.setValue(new ArrayList<>());
         allAlarmList.setValue(new ArrayList<>());
+
+        refreshLog.setValue(false);
+        refreshAlarmBar.setValue(false);
     }
 
     // Setters
@@ -194,6 +205,7 @@ public class CustomViewModel extends ViewModel {
     public void setAttemptUsbConnect(boolean attemptUsbConnect) { this.attemptUsbConnect.setValue(attemptUsbConnect); }
     public void setUsbConnected(boolean usbConnected) { this.usbConnected.setValue(usbConnected); }
     public void setShutdown(boolean shutdown) { this.shutdown.setValue(shutdown); }
+    public void setReadings(boolean readings) { this.readings.setValue(readings); }
 
     // Ventilator values
     public void setTabSelected(int tabSelected) { this.tabSelected.setValue(tabSelected); }
@@ -260,6 +272,9 @@ public class CustomViewModel extends ViewModel {
     // Waveform Fragment
     public void setUpperChartValue(float upperChartValue) { this.upperChartValue.setValue(upperChartValue); }
     public void setLowerChartValue(float lowerChartValue) { this.lowerChartValue.setValue(lowerChartValue); }
+    public void setInputPress(float inputPress) { this.inputPress.setValue(inputPress); }
+    public void setDryAirInFlow(float dryAirInFlow) { this.dryAirInFlow.setValue(dryAirInFlow); }
+    public void setOxInFlow(float oxInFlow) { this.oxInFlow.setValue(oxInFlow); }
 
     // Log Fragment
     public void setAlarm(Alarm alarm) {
@@ -273,6 +288,7 @@ public class CustomViewModel extends ViewModel {
     public void clearActiveAlarm(Alarm alarm) {
         activeAlarmList.getValue().remove(alarm);
         allAlarmList.getValue().get(allAlarmList.getValue().indexOf(alarm)).setCleared(true);
+        allAlarmList.getValue().get(allAlarmList.getValue().indexOf(alarm)).setEndTime(new Date());
     }
 
     public void removeAlarm(Alarm alarm) {
@@ -300,6 +316,7 @@ public class CustomViewModel extends ViewModel {
     public MutableLiveData<Boolean> getAttemptUsbConnect() { return this.attemptUsbConnect; }
     public MutableLiveData<Boolean> getUsbConnected() { return this.usbConnected; }
     public MutableLiveData<Boolean> getShutdown() { return this.shutdown; }
+    public MutableLiveData<Boolean> getReadings() { return this.readings; }
 
     // Ventilator values
     public MutableLiveData<Integer> getTabSelected() { return this.tabSelected; }
@@ -372,6 +389,9 @@ public class CustomViewModel extends ViewModel {
     // Waveform Fragment
     public MutableLiveData<Float> getUpperChartValue() { return upperChartValue; }
     public MutableLiveData<Float> getLowerChartValue() { return lowerChartValue; }
+    public MutableLiveData<Float> getInputPress() { return inputPress; }
+    public MutableLiveData<Float> getDryAirInFlow() { return dryAirInFlow; }
+    public MutableLiveData<Float> getOxInFlow() { return oxInFlow; }
 
     // Log Fragment
     public MutableLiveData<Alarm> getAlarm() { return alarm; }

@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="horizontal"
+    android:layout_width="800dp"
+    android:layout_height="65dp"
+    android:background="@color/orange"
+    android:gravity="center">
+
+    <TextView
+        android:id="@+id/popup_alarm_textView"
+        android:layout_width="590dp"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:text="@string/alarm"
+        android:textColor="@color/white"
+        android:textSize="20sp"/>
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="60dp"
+        android:layout_marginEnd="10dp"
+        android:visibility="invisible"
+        android:text="@string/more"/>
+
+    <Button
+        android:id="@+id/popup_alarm_clear_button"
+        android:layout_width="wrap_content"
+        android:layout_height="60dp"
+        android:layout_marginEnd="10dp"
+        android:backgroundTint="@color/white"
+        android:text="@string/clear"
+        android:textColor="@color/gray"/>
+
+</LinearLayout>

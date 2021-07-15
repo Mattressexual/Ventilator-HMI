@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="horizontal"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_margin="10dp"
+    android:baselineAligned="false">
+
+    <TextView
+        android:id="@+id/log_alarm_textView"
+        android:layout_width="250dp"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_vertical"
+        android:padding="3dp"
+        android:text="@string/alarm"
+        android:textSize="20sp"/>
+
+    <View
+        android:layout_width="1dp"
+        android:layout_height="match_parent"
+        android:layout_gravity="center_vertical"
+        android:layout_margin="5dp"
+        android:background="@color/black"/>
+
+    <TextView
+        android:id="@+id/log_priority_textView"
+        android:layout_width="100dp"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_vertical"
+        android:padding="3dp"
+        android:text="@string/priority"
+        android:textSize="20sp"/>
+
+    <View
+        android:layout_width="1dp"
+        android:layout_height="match_parent"
+        android:layout_gravity="center_vertical"
+        android:layout_margin="5dp"
+        android:background="@color/black"/>
+
+    <TextView
+        android:id="@+id/log_status_textView"
+        android:layout_width="100dp"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_vertical"
+        android:padding="3dp"
+        android:text="@string/status"
+        android:textSize="20sp"/>
+
+    <View
+        android:layout_width="1dp"
+        android:layout_height="match_parent"
+        android:layout_gravity="center_vertical"
+        android:layout_margin="5dp"
+        android:background="@color/black"/>
+
+    <TextView
+        android:id="@+id/log_startTime_textView"
+        android:layout_width="200dp"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_vertical"
+        android:padding="3dp"
+        android:text="@string/started"
+        android:textSize="20sp"/>
+
+    <View
+        android:layout_width="1dp"
+        android:layout_height="match_parent"
+        android:layout_gravity="center_vertical"
+        android:layout_margin="5dp"
+        android:background="@color/black"/>
+
+    <TextView
+        android:id="@+id/log_endTime_textView"
+        android:layout_width="200dp"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_vertical"
+        android:padding="3dp"
+        android:text="@string/ended"
+        android:textSize="20sp"/>
+
+    <View
+        android:layout_width="1dp"
+        android:layout_height="match_parent"
+        android:layout_gravity="center_vertical"
+        android:layout_margin="5dp"
+        android:background="@color/black"/>
+
+    <Button
+        android:id="@+id/log_clear_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_vertical"
+        android:text="@string/clear"/>
+
+</LinearLayout>

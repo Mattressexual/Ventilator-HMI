@@ -19,8 +19,6 @@ import com.google.android.material.tabs.TabLayout;
 
 public class SettingsFragment extends Fragment {
 
-    boolean debug;
-
     CustomViewModel model;
     FragmentManager fragmentManager;
     Fragment ventilationTab, alarmLimitsTab, waveformFragment;
@@ -44,8 +42,6 @@ public class SettingsFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-
-        debug = model.getDebug().getValue();
 
         fragmentManager = getParentFragmentManager();
         FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
@@ -96,13 +92,14 @@ public class SettingsFragment extends Fragment {
 
         startVentilationButton.setOnClickListener(v -> {
             boolean connected = model.getUsbConnected().getValue();
-            if (connected || debug) {
+            if (connected || model.getDebug().getValue()) {
 
                 if (model.getAlarmRangesOkay()) {
                     model.setTempReset(false);
                     model.setSaveChanges(true);
                     model.setVentRunning(true);
                     model.setFirstRun(false);
+                    model.setReadings(true);
 
                     waveformFragment = fragmentManager.findFragmentByTag(Constants.WAVEFORM_FRAGMENT);
 

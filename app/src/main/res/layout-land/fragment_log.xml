@@ -28,9 +28,8 @@
             android:orientation="horizontal">
 
             <TextView
-                android:layout_width="wrap_content"
+                android:layout_width="250dp"
                 android:layout_height="wrap_content"
-                android:layout_weight="3"
                 android:padding="2dp"
                 android:text="@string/alarm"
                 android:textSize="20sp"/>
@@ -42,9 +41,8 @@
                 android:background="@color/black"/>
 
             <TextView
-                android:layout_width="wrap_content"
+                android:layout_width="100dp"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
                 android:padding="2dp"
                 android:text="@string/priority"
                 android:textSize="20sp"/>
@@ -56,9 +54,8 @@
                 android:background="@color/black"/>
 
             <TextView
-                android:layout_width="wrap_content"
+                android:layout_width="100dp"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
                 android:padding="2dp"
                 android:text="@string/status"
                 android:textSize="20sp"/>
@@ -70,9 +67,8 @@
                 android:background="@color/black"/>
 
             <TextView
-                android:layout_width="wrap_content"
+                android:layout_width="200dp"
                 android:layout_height="wrap_content"
-                android:layout_weight="2"
                 android:padding="2dp"
                 android:text="@string/started"
                 android:textSize="20sp"/>
@@ -84,9 +80,8 @@
                 android:background="@color/black"/>
 
             <TextView
-                android:layout_width="wrap_content"
+                android:layout_width="200dp"
                 android:layout_height="wrap_content"
-                android:layout_weight="2"
                 android:padding="2dp"
                 android:text="@string/ended"
                 android:textSize="20sp"/>
@@ -98,40 +93,51 @@
                 android:background="@color/black"/>
 
             <TextView
-                android:layout_width="wrap_content"
+                android:layout_width="100dp"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
                 android:padding="2dp"
                 android:text="@string/actions"
                 android:textSize="20sp"/>
 
         </LinearLayout>
 
-        <ScrollView
+        <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="250dp"
-            android:layout_margin="10dp">
+            android:layout_height="400dp"
+            android:orientation="vertical">
 
-            <LinearLayout
-                android:id="@+id/alarm_scroll_linearLayout"
+            <ScrollView
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"/>
+                android:layout_height="200dp"
+                android:layout_weight="1"
+                android:layout_margin="10dp">
 
-        </ScrollView>
+                <LinearLayout
+                    android:id="@+id/alarm_scroll_linearLayout"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"/>
 
-        <ScrollView
-            android:layout_width="match_parent"
-            android:layout_height="250dp"
-            android:layout_margin="10dp">
+            </ScrollView>
 
-            <TextView
-                android:id="@+id/log_scroll_textView"
+            <ScrollView
+                android:id="@+id/log_buffer_scrollView"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_margin="5dp" />
+                android:layout_height="200dp"
+                android:layout_weight="1"
+                android:layout_margin="10dp"
+                android:background="@color/gray">
 
-        </ScrollView>
+                <TextView
+                    android:id="@+id/log_scroll_textView"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="5dp"
+                    android:textColor="@color/white"/>
+
+            </ScrollView>
+
+        </LinearLayout>
 
         <LinearLayout
             android:layout_width="match_parent"

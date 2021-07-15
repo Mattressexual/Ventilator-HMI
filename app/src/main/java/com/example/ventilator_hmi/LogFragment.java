@@ -13,22 +13,24 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.LinearLayout;
+import android.widget.ScrollView;
 import android.widget.TextView;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Date;
 
 public class LogFragment extends Fragment {
 
     CustomViewModel model;
 
+    ScrollView bufferScrollView;
+
     View rootView;
-    LinearLayout scrollLinearLayout;
+    LinearLayout alarmScroll;
     Button removeAlarmsButton, closeButton;
     TextView logTextView;
 
-    ArrayList<AlarmRow> alarmRows = new ArrayList<>();
+    ArrayList<AlarmRow> alarmRows;
 
     FragmentManager fragmentManager;
 
@@ -51,14 +53,41 @@ public class LogFragment extends Fragment {
 
         fragmentManager = getParentFragmentManager();
 
-        scrollLinearLayout = rootView.findViewById(R.id.alarm_scroll_linearLayout);
+        bufferScrollView = rootView.findViewById(R.id.log_buffer_scrollView);
+        alarmScroll = rootView.findViewById(R.id.alarm_scroll_linearLayout);
 
         removeAlarmsButton = rootView.findViewById(R.id.remove_active_alarms_button);
         closeButton = rootView.findViewById(R.id.close_button);
         logTextView = rootView.findViewById(R.id.log_scroll_textView);
 
-        removeAlarmsButton.setOnClickListener(v -> {
+        model.getReceiveBuffer().observe(requireActivity(), buffer -> {
+            logTextView.append(buffer);
+        });
 
+        alarmRows = new ArrayList<>();
+        model.getAlarm().observe(requireActivity(), alarm -> {
+            AlarmRow alarmRow = new AlarmRow(alarm);
+            alarmRows.add(alarmRow);
+            alarmScroll.addView(alarmRow.view);
+        });
+
+        removeAlarmsButton.setOnClickListener(v -> {
+            ArrayList<Alarm> clearList = new ArrayList<>();
+            for (Alarm alarm : model.getAllAlarmList().getValue()) {
+                if (alarm.isCleared())
+                    clearList.add(alarm);
+            }
+            for (Alarm alarm : clearList) {
+                model.removeAlarm(alarm);
+            }
+
+            alarmScroll.removeAllViews();
+            for (Alarm alarm : model.getAllAlarmList().getValue()) {
+                AlarmRow alarmRow = new AlarmRow(alarm);
+
+                alarmRows.add(alarmRow);
+                alarmScroll.addView(alarmRow.view);
+            }
         });
 
         closeButton.setOnClickListener(v -> {
@@ -70,49 +99,56 @@ public class LogFragment extends Fragment {
                     .hide(this)
                     .commit();
         });
+
+        model.getRefreshLog().observe(requireActivity(), refresh -> {
+            if (refresh) {
+                alarmScroll.removeAllViews();
+                alarmRows.clear();
+
+                for (Alarm alarm : model.getAllAlarmList().getValue()) {
+                    AlarmRow alarmRow = new AlarmRow(alarm);
+                    alarmRows.add(alarmRow);
+                    alarmScroll.addView(alarmRow.view);
+                }
+                model.setRefreshLog(false);
+            }
+        });
     }
 
     class AlarmRow {
         Alarm alarm;
-        LinearLayout alarmRowLinearLayout;
+        View view;
         TextView alarmTextView, priorityTextView, statusTextView, startTimeTextView, endTimeTextView;
         Button clearButton;
-        boolean active;
 
-        AlarmRow (Alarm alarm, Context context) {
+        AlarmRow (Alarm alarm) {
+            LayoutInflater inflater = (LayoutInflater) getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+            this.view = inflater.inflate(R.layout.log_alarm_row, null);
             this.alarm = alarm;
-            active = true;
 
-            alarmRowLinearLayout = new LinearLayout(context);
-            alarmRowLinearLayout.setOrientation(LinearLayout.HORIZONTAL);
-            alarmRowLinearLayout.setLayoutParams(
-                    new LinearLayout.LayoutParams(
-                            LinearLayout.LayoutParams.MATCH_PARENT,
-                            LinearLayout.LayoutParams.WRAP_CONTENT));
-
-            alarmTextView = new TextView(context);
-            priorityTextView = new TextView(context);
-            statusTextView = new TextView(context);
-            startTimeTextView = new TextView(context);
-            endTimeTextView = new TextView(context);
-            clearButton = new Button(context);
+            alarmTextView = view.findViewById(R.id.log_alarm_textView);
+            priorityTextView = view.findViewById(R.id.log_priority_textView);
+            statusTextView = view.findViewById(R.id.log_status_textView);
+            startTimeTextView = view.findViewById(R.id.log_startTime_textView);
+            endTimeTextView = view.findViewById(R.id.log_endTime_textView);
+            clearButton = view.findViewById(R.id.log_clear_button);
 
             alarmTextView.setText(alarm.getAlarmText());
-
             priorityTextView.setText(alarm.getPriority());
-            startTimeTextView.setText(alarm.getStartTime() != null ? alarm.getStartTime().toString() : "null");
-            endTimeTextView.setText(alarm.getEndTime() != null ? alarm.getEndTime().toString() : "null");
+            statusTextView.setText(alarm.isCleared() ? R.string.cleared : R.string.active);
+            startTimeTextView.setText(alarm.getStartTime().toString());
+            if (alarm.getEndTime() != null)
+                endTimeTextView.setText(alarm.getEndTime().toString());
+            else
+                endTimeTextView.setText(R.string.dash);
+            clearButton.setEnabled(!alarm.isCleared());
 
-            alarmRowLinearLayout.addView(alarmTextView);
-            alarmRowLinearLayout.addView(priorityTextView);
-            alarmRowLinearLayout.addView(statusTextView);
-            alarmRowLinearLayout.addView(startTimeTextView);
-            alarmRowLinearLayout.addView(endTimeTextView);
-            alarmRowLinearLayout.addView(clearButton);
-
-            clearButton.setOnClickListener(v -> {
+            clearButton.setOnClickListener(clear -> {
+                statusTextView.setText(R.string.cleared);
+                alarm.setEndTime(new Date());
+                endTimeTextView.setText(alarm.getEndTime().toString());
                 clearButton.setEnabled(false);
-                this.alarm.setCleared(true);
+                model.clearActiveAlarm(alarm);
                 model.setRefreshAlarmBar(true);
             });
         }

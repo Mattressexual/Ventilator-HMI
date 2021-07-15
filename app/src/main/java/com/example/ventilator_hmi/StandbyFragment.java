@@ -10,6 +10,7 @@ import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.PopupWindow;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -63,32 +64,29 @@ public class StandbyFragment extends Fragment {
                 model.setAttemptUsbConnect(true);
 
             if (model.getUsbConnected().getValue() || model.getDebug().getValue()) {
-                if (!model.getUsbConnected().getValue())
-                    model.setAttemptUsbConnect(true);
+                model.setTabSelected(0);
+                String current = fragmentManager.getBackStackEntryAt(fragmentManager.getBackStackEntryCount() - 1).getName();
 
-                if (model.getUsbConnected().getValue() || model.getDebug().getValue()) {
-                    model.setTabSelected(0);
-                    String current = fragmentManager.getBackStackEntryAt(fragmentManager.getBackStackEntryCount() - 1).getName();
+                model.setResetDefault(true);
 
-                    model.setResetDefault(true);
-
-                    FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-                    for (Fragment fragment : fragmentManager.getFragments()) {
-                        if (!fragment.getTag().equals(Constants.VENTILATION_TAB)
-                                && !fragment.getTag().equals(Constants.ALARM_LIMITS_TAB))
-                            fragmentTransaction.hide(fragment);
-                    }
-                    settingsFragment = fragmentManager.findFragmentByTag(Constants.SETTINGS_FRAGMENT);
-                    if (settingsFragment == null) {
-                        settingsFragment = new SettingsFragment();
-                        fragmentTransaction.add(R.id.fragment_container_view, settingsFragment, Constants.SETTINGS_FRAGMENT);
-                    } else
-                        fragmentTransaction.show(settingsFragment);
-                    fragmentTransaction
-                            .addToBackStack(Constants.SETTINGS_FRAGMENT)
-                            .commit();
+                FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+                for (Fragment fragment : fragmentManager.getFragments()) {
+                    if (!fragment.getTag().equals(Constants.VENTILATION_TAB)
+                            && !fragment.getTag().equals(Constants.ALARM_LIMITS_TAB))
+                        fragmentTransaction.hide(fragment);
                 }
+                settingsFragment = fragmentManager.findFragmentByTag(Constants.SETTINGS_FRAGMENT);
+                if (settingsFragment == null) {
+                    settingsFragment = new SettingsFragment();
+                    fragmentTransaction.add(R.id.fragment_container_view, settingsFragment, Constants.SETTINGS_FRAGMENT);
+                } else
+                    fragmentTransaction.show(settingsFragment);
+                fragmentTransaction
+                        .addToBackStack(Constants.SETTINGS_FRAGMENT)
+                        .commit();
             }
+            else
+                Toast.makeText(getActivity(), "No device", Toast.LENGTH_SHORT).show();
         });
 
         samePatientButton.setOnClickListener(v -> {
@@ -105,6 +103,8 @@ public class StandbyFragment extends Fragment {
                         .addToBackStack(Constants.WAVEFORM_FRAGMENT)
                         .commit();
             }
+            else
+                Toast.makeText(getActivity(), "No device", Toast.LENGTH_SHORT).show();
         });
         if (savedInstanceState == null) { samePatientButton.setEnabled(false); }
         model.getFirstRun().observe(requireActivity(), firstRun -> {
